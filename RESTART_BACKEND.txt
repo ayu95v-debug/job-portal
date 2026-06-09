@@ -1,0 +1,17 @@
+# Backend Restart Instructions
+
+## Stop all Node processes:
+taskkill /F /IM node.exe
+
+## Then start the backend:
+cd c:\Documents\Desktop\job-portal\backend
+node server.js
+
+## You should see console output like:
+# ✅ Server running on http://127.0.0.1:5000
+# 🔍 Recommend jobs called for userId: 1
+# ✅ User profile: { qualifications: '...', about: '...' }
+# 📝 Extracted keywords: [...keywords...]
+# 📊 Total jobs in database: X
+# 🎯 Top 3 jobs by score: [...]
+# ✨ Returning N recommended jobs

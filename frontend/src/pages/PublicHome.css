@@ -1,0 +1,499 @@
+.public-home {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(20, 184, 166, 0.16), transparent 30%),
+    radial-gradient(circle at 90% 0%, rgba(99, 102, 241, 0.14), transparent 28%),
+    #f6f8fb;
+  color: #111827;
+  padding-bottom: 56px;
+}
+
+.public-hero {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 72px 20px 42px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.72fr);
+  gap: 34px;
+  align-items: center;
+}
+
+.hero-copy h1 {
+  max-width: 740px;
+  margin: 14px 0 18px;
+  font-size: clamp(42px, 7vw, 76px);
+  line-height: 0.98;
+  letter-spacing: 0;
+  color: #0f172a;
+}
+
+.hero-copy p {
+  max-width: 620px;
+  margin: 0;
+  color: #475569;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f766e;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.primary-btn,
+.secondary-btn,
+.ghost-btn,
+.match-btn {
+  border: 0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primary-btn,
+.match-btn {
+  background: #111827;
+  color: #ffffff;
+  box-shadow: 0 16px 34px rgba(17, 24, 39, 0.18);
+}
+
+.primary-btn,
+.secondary-btn,
+.ghost-btn {
+  padding: 13px 20px;
+}
+
+.secondary-btn,
+.ghost-btn {
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #dbe3ef;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 620px;
+  margin-top: 36px;
+}
+
+.hero-stats div {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(203, 213, 225, 0.7);
+  border-radius: 8px;
+  padding: 16px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.hero-stats strong,
+.hero-stats span {
+  display: block;
+}
+
+.hero-stats strong {
+  font-size: 24px;
+  color: #0f172a;
+}
+
+.hero-stats span {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.resume-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.13);
+}
+
+.panel-topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #0f766e;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.panel-topline b {
+  background: #ccfbf1;
+  color: #115e59;
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+
+.resume-panel h2 {
+  margin: 22px 0 6px;
+  font-size: 28px;
+  color: #111827;
+}
+
+.panel-subtitle,
+.privacy-note {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.resume-analysis {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.analysis-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.analysis-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.analysis-tags span {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #075985;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.analysis-recommendation {
+  margin: 0;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.upload-dropzone {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 118px;
+  margin: 22px 0 16px;
+  padding: 18px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: 180ms ease;
+}
+
+.upload-dropzone:hover,
+.upload-dropzone.has-file {
+  border-color: #14b8a6;
+  background: #f0fdfa;
+}
+
+.upload-dropzone input {
+  display: none;
+}
+
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.upload-dropzone strong,
+.upload-dropzone small {
+  display: block;
+}
+
+.upload-dropzone strong {
+  color: #0f172a;
+  overflow-wrap: anywhere;
+}
+
+.upload-dropzone small {
+  margin-top: 5px;
+  color: #64748b;
+}
+
+.match-btn {
+  width: 100%;
+  min-height: 48px;
+}
+
+.match-btn:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.status-message {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.status-message.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-message.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.jobs-preview,
+.signup-choice,
+.login-strip {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 28px 0 18px;
+}
+
+.section-heading h2 {
+  margin: 8px 0 0;
+  font-size: 34px;
+  color: #0f172a;
+}
+
+.job-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.public-job-card {
+  min-height: 218px;
+  padding: 22px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.07);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.public-job-card:hover {
+  transform: translateY(-4px);
+  border-color: #14b8a6;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.12);
+}
+
+.job-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.job-type,
+.job-location {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.job-type {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.job-location {
+  background: #f1f5f9;
+  color: #475569;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-job-card h3 {
+  margin: 0 0 7px;
+  color: #111827;
+  font-size: 20px;
+}
+
+.company-name {
+  margin: 0 0 14px;
+  color: #0f766e;
+  font-weight: 800;
+}
+
+.job-summary {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.jobs-state {
+  padding: 40px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #64748b;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+.signup-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.signup-card {
+  min-height: 230px;
+  padding: 28px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 14px 38px rgba(15, 23, 42, 0.08);
+}
+
+.signup-card.hr {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+}
+
+.signup-label {
+  display: inline-flex;
+  margin-bottom: 14px;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: #ccfbf1;
+  color: #115e59;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.signup-card.hr .signup-label {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ccfbf1;
+}
+
+.signup-card h2 {
+  margin: 0 0 10px;
+  font-size: 28px;
+}
+
+.signup-card p {
+  max-width: 500px;
+  min-height: 54px;
+  margin: 0 0 22px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.signup-card.hr p {
+  color: #cbd5e1;
+}
+
+.signup-card.hr .primary-btn {
+  background: #ffffff;
+  color: #111827;
+  box-shadow: none;
+}
+
+.login-strip {
+  margin-top: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 14px;
+  padding: 26px 30px;
+}
+
+.login-strip h2,
+.login-strip p {
+  margin: 0;
+}
+
+.login-strip p {
+  margin-top: 6px;
+  color: #cbd5e1;
+}
+
+.login-strip .primary-btn {
+  background: #ffffff;
+  color: #111827;
+  box-shadow: none;
+}
+
+@media (max-width: 920px) {
+  .public-hero,
+  .signup-choice,
+  .job-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .public-hero {
+    padding-top: 42px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-actions,
+  .section-heading,
+  .login-strip {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .resume-panel {
+    padding: 20px;
+  }
+
+  .hero-copy h1 {
+    font-size: 42px;
+  }
+}

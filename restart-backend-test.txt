@@ -1,0 +1,26 @@
+#!/bin/bash
+# Backend Restart and Test Script
+
+echo "🛑 Stopping all Node processes..."
+taskkill /F /IM node.exe 2>nul
+
+echo "⏳ Waiting 2 seconds..."
+timeout /t 2 /nobreak
+
+echo "🚀 Starting backend server..."
+cd c:\Documents\Desktop\job-portal\backend
+node server.js
+
+# The server will now show detailed logs like:
+# === 🔍 RECOMMEND JOBS ENDPOINT ===
+# ✅ User profile found
+#    Qualifications: javascript, react, node...
+#    About: full stack developer...
+# 📄 Profile text length: 45
+# 🔎 Tech skills found: 5 skills
+# 📝 Final extracted skills: 5 skills - javascript, react, nodejs, ...
+# ✅ Full Stack Developer - Score: 8
+# ✅ React Developer - Score: 5
+# 📊 Jobs with score 0: 8
+# 🔥 Relevant jobs found: 3
+# ✨ Returning 3 recommended jobs

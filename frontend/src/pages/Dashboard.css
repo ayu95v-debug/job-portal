@@ -1,0 +1,774 @@
+.dashboard-card,
+.dashboard-panel {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.12) !important;
+  border-color: #14b8a6 !important;
+}
+
+.hr-dashboard h1,
+.hr-dashboard h2,
+.candidate-dashboard h1,
+.candidate-dashboard h2 {
+  color: #0f172a;
+  letter-spacing: 0;
+}
+
+.hr-dashboard h1 {
+  margin: 0 0 18px;
+  font-size: 36px;
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.hr-dashboard h2 {
+  font-size: 24px;
+  line-height: 1.18;
+  font-weight: 700;
+}
+
+.hr-dashboard h3 {
+  color: #111827;
+  font-weight: 600;
+}
+
+.hr-dashboard table th {
+  background: #0f172a;
+  color: #ffffff;
+  text-align: left;
+  padding: 14px;
+  font-size: 13px;
+}
+
+.hr-dashboard table td {
+  padding: 14px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.hr-dashboard table tr:last-child td {
+  border-bottom: 0;
+}
+
+.hr-dashboard table tr:hover td {
+  background: #f8fafc;
+}
+
+.hr-dashboard svg {
+  max-width: 100%;
+}
+
+.candidate-dashboard input[type="file"] {
+  max-width: 100%;
+}
+
+@media (max-width: 900px) {
+  .hr-dashboard {
+    flex-direction: column;
+  }
+
+  .hr-dashboard > div:first-child {
+    width: auto !important;
+    min-height: auto !important;
+    position: static !important;
+  }
+
+  .hr-dashboard > div:nth-child(2) {
+    padding: 24px 16px !important;
+  }
+
+  .candidate-dashboard [style*="jobsGrid"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .candidate-dashboard [style*="heroTitle"] {
+    font-size: 38px !important;
+  }
+
+  .candidate-dashboard [style*="uploadCard"] {
+    padding: 24px !important;
+  }
+
+  .hr-dashboard table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+.hr-dashboard-v2 {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  background:
+    radial-gradient(circle at 82% 0%, rgba(20, 184, 166, 0.15), transparent 28%),
+    radial-gradient(circle at 10% 8%, rgba(59, 130, 246, 0.12), transparent 26%),
+    #f6f8fb;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.hr-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+  background: #0f172a;
+  color: #ffffff;
+  box-shadow: 18px 0 45px rgba(15, 23, 42, 0.16);
+}
+
+.hr-sidebar h2,
+.hr-main h1,
+.hr-panel h2 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+.hr-sidebar h2 {
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.hr-kicker {
+  margin: 0 0 7px;
+  color: #14b8a6;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.hr-sidebar-copy {
+  margin: 8px 0 0;
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.hr-nav {
+  display: grid;
+  gap: 8px;
+  margin: 28px 0;
+}
+
+.hr-nav button,
+.hr-ghost-btn,
+.hr-primary-btn,
+.hr-danger-btn,
+.hr-success-btn,
+.hr-link-btn,
+.hr-stat-card,
+.hr-action-list button {
+  font: inherit;
+}
+
+.hr-nav button {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #dbeafe;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.hr-nav button.active,
+.hr-nav button:hover {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.hr-sidebar-actions,
+.hr-topbar-actions,
+.hr-card-actions,
+.hr-row-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hr-sidebar-actions {
+  flex-direction: column;
+}
+
+.hr-primary-btn,
+.hr-danger-btn,
+.hr-success-btn,
+.hr-ghost-btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 850;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+
+.hr-primary-btn {
+  background: #111827;
+  color: #ffffff;
+}
+
+.hr-primary-btn.as-link,
+.hr-ghost-btn.as-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hr-primary-btn.full {
+  width: 100%;
+}
+
+.hr-success-btn {
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.hr-danger-btn {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.hr-ghost-btn {
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #dbe3ef;
+}
+
+.hr-ghost-btn.light {
+  background: #f8fafc;
+}
+
+.hr-main {
+  min-width: 0;
+  padding: 28px;
+}
+
+.hr-topbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.hr-main h1 {
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.05;
+  font-weight: 700;
+}
+
+.hr-insight-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(110px, 1fr));
+  gap: 8px;
+  flex: 1;
+  max-width: 640px;
+}
+
+.hr-insight-strip span {
+  min-width: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.hr-insight-strip small,
+.hr-insight-strip strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hr-insight-strip small {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.hr-insight-strip strong {
+  margin-top: 3px;
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.hr-alert {
+  margin-bottom: 18px;
+  padding: 10px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.hr-alert.muted {
+  border-color: #bae6fd;
+  background: #f0f9ff;
+  color: #075985;
+}
+
+.hr-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.hr-stat-card {
+  display: grid;
+  gap: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+  color: #0f172a;
+  text-align: left;
+}
+
+.hr-stat-card span,
+.hr-profile-row span,
+.hr-detail-grid span,
+.hr-detail-block span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.hr-stat-card strong {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.hr-stat-card small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.hr-dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.8fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.hr-panel {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+}
+
+.hr-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.hr-panel h2 {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.hr-panel p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.hr-chart {
+  min-height: 230px;
+}
+
+.hr-chart.compact {
+  min-height: 200px;
+}
+
+.hr-pipeline-list {
+  display: grid;
+  gap: 8px;
+}
+
+.hr-pipeline-list span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.hr-pipeline-list i {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.hr-job-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.hr-job-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 15px;
+  background: #ffffff;
+}
+
+.hr-job-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hr-job-card h3 {
+  margin: 0;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.hr-job-card-head span,
+.hr-tags span,
+.hr-status {
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.hr-job-desc {
+  min-height: 58px;
+}
+
+.hr-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.hr-filters {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) 180px 220px;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.hr-filters input,
+.hr-filters select,
+.hr-form-grid input,
+.hr-form-grid textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: #ffffff;
+  color: #111827;
+}
+
+.hr-table-wrap {
+  overflow-x: auto;
+}
+
+.hr-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.hr-table th {
+  padding: 11px;
+  background: #0f172a;
+  color: #e2e8f0;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hr-table td {
+  padding: 11px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+  vertical-align: top;
+  font-size: 13px;
+}
+
+.hr-table td strong,
+.hr-table td span {
+  display: block;
+}
+
+.hr-table a,
+.hr-link-btn {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #0f766e;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.hr-muted {
+  color: #94a3b8 !important;
+}
+
+.hr-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.hr-status.selected {
+  background: #ccfbf1;
+  color: #115e59;
+}
+
+.hr-status.rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.hr-empty {
+  display: grid;
+  place-items: center;
+  min-height: 120px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.hr-profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+  gap: 14px;
+}
+
+.hr-profile-row,
+.hr-detail-grid div {
+  display: grid;
+  gap: 5px;
+  padding: 11px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.hr-action-list {
+  display: grid;
+  gap: 8px;
+}
+
+.hr-action-list button {
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  color: #111827;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.hr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(15, 23, 42, 0.58);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.hr-modal {
+  position: relative;
+  z-index: 1;
+  width: min(620px, 100%);
+  max-height: 88vh;
+  overflow: auto;
+  border-radius: 8px;
+  padding: 18px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+  cursor: default;
+}
+
+.hr-modal-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.hr-modal-head h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.hr-modal-head button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #dbe3ef;
+  border-radius: 999px;
+  background: #f8fafc;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.hr-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 18px;
+}
+
+.hr-detail-block {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.hr-form-grid {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.hr-form-grid textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.hr-detail-block.resume {
+  padding: 10px;
+}
+
+.hr-resume-mini,
+.hr-resume-frame {
+  margin-top: 8px;
+  overflow: hidden;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.hr-resume-mini {
+  height: 260px;
+}
+
+.hr-resume-frame {
+  height: min(68vh, 720px);
+}
+
+.hr-resume-mini iframe,
+.hr-resume-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #ffffff;
+}
+
+.hr-modal.resume-preview {
+  width: min(1040px, 100%);
+}
+
+@media (max-width: 1100px) {
+  .hr-dashboard-v2 {
+    grid-template-columns: 1fr;
+  }
+
+  .hr-sidebar {
+    position: static;
+    height: auto;
+  }
+
+  .hr-nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .hr-sidebar-actions {
+    flex-direction: row;
+  }
+
+  .hr-metrics,
+  .hr-dashboard-grid,
+  .hr-profile-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .hr-main {
+    padding: 22px 14px;
+  }
+
+  .hr-topbar,
+  .hr-panel-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hr-insight-strip {
+    grid-template-columns: 1fr 1fr;
+    max-width: none;
+  }
+
+  .hr-nav,
+  .hr-metrics,
+  .hr-dashboard-grid,
+  .hr-profile-grid,
+  .hr-filters,
+  .hr-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hr-table {
+    min-width: 760px;
+  }
+
+  .hr-resume-frame {
+    height: 60vh;
+  }
+}
