@@ -3,9 +3,8 @@ import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "./AppPages.css";
 
-const API = window.location.hostname === "localhost"
-  ? "http://localhost:5000"
-  : "https://job-portal-omfp.onrender.com";
+const API = window.location.hostname === 
+ "https://job-portal-omfp.onrender.com";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -56,7 +55,10 @@ export default function Signup() {
         navigate("/dashboard", { replace: true });
       }
     } catch (err) {
-      setMessage(err.response?.data?.msg || "Signup failed");
+      setMessage(
+        err.response?.data?.msg ||
+          (err.request ? "Backend is not running or not reachable. Please restart backend." : "Signup failed")
+      );
     } finally {
       setLoading(false);
     }
