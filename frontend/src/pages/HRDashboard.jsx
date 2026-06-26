@@ -15,7 +15,7 @@ import {
 } from "recharts";
 import "./Dashboard.css";
 
-const API = "http://localhost:5000";
+const API = "https://job-portal-omfp.onrender.com";
 const STATUS_COLORS = {
   Selected: "#0f766e",
   Rejected: "#dc2626",

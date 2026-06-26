@@ -18,7 +18,7 @@ export default function PublicHome() {
   const fetchAllJobs = async () => {
     try {
       setJobsLoading(true);
-      const response = await axios.get("http://localhost:5000/api/jobs");
+      const response = await axios.get("https://job-portal-omfp.onrender.com/api/jobs");
       setJobs(response.data || []);
     } catch (err) {
       console.error("Error fetching jobs:", err);
@@ -126,7 +126,7 @@ export default function PublicHome() {
     try {
       setLoading(true);
       const res = await axios.post(
-        `http://localhost:5000/api/auth/upload-resume/${userId}`,
+        `https://job-portal-omfp.onrender.com/api/auth/upload-resume/${userId}`,
         formData
       );
       setMessage("Resume uploaded successfully.");

@@ -18,7 +18,7 @@ function MyApplications() {
     }
 
     axios
-      .get(`http://localhost:5000/api/my-applications/${userId}`)
+      .get(`https://job-portal-omfp.onrender.com/api/my-applications/${userId}`)
       .then((res) => setApps(res.data || []))
       .catch(() => alert("Failed to load applications"));
   }, [navigate, userId]);

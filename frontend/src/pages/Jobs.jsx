@@ -24,7 +24,7 @@ export default function Jobs() {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/jobs");
+      const res = await axios.get("https://job-portal-omfp.onrender.com/api/jobs");
       setJobs(res.data || []);
     } catch (err) {
       console.log(err);
@@ -35,7 +35,7 @@ export default function Jobs() {
 
   const fetchRecommendations = async (userId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/auth/recommend-jobs/${userId}`);
+      const res = await axios.get(`https://job-portal-omfp.onrender.com/api/auth/recommend-jobs/${userId}`);
       const recommendations = res.data?.recommendedJobs || [];
       const scores = {};
       const skills = {};
@@ -61,7 +61,7 @@ export default function Jobs() {
         return;
       }
 
-      const res = await axios.post("http://localhost:5000/api/apply", {
+      const res = await axios.post("https://job-portal-omfp.onrender.com/api/apply", {
         jobId,
         userId: user.id,
       });

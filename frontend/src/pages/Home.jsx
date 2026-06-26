@@ -79,7 +79,7 @@ export default function Home() {
     try {
       setLoading(true);
       const res = await axios.post(
-        `http://localhost:5000/api/auth/upload-resume/${user.id}`,
+        "https://job-portal-omfp.onrender.com/api/auth/upload-resume/${user.id}",
         formData
       );
       setMessage("✅ Resume uploaded successfully!");
@@ -240,7 +240,7 @@ export default function Home() {
                       <button
                         onClick={async () => {
                           try {
-                            await axios.post("http://localhost:5000/api/apply", {
+                            await axios.post("https://job-portal-omfp.onrender.com/api/apply", {
                               jobId: job.id,
                               userId: user.id,
                             });

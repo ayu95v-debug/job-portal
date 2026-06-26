@@ -12,7 +12,7 @@ function Applicants() {
 
   const load = () => {
     axios
-      .get(`http://localhost:5000/api/jobs/${jobId}/applicants`, {
+         .get(`https://job-portal-omfp.onrender.com/api/jobs/${jobId}/applicants`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setApps(res.data || []))
@@ -23,7 +23,7 @@ function Applicants() {
 
   const update = async (appId, status) => {
     await axios.put(
-      "http://localhost:5000/api/applications/status",
+      `https://job-portal-omfp.onrender.com/api/applications/status`,
       { appId, status },
       { headers: { Authorization: `Bearer ${token}` } }
     );

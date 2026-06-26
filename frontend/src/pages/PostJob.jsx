@@ -16,7 +16,7 @@ function PostJob() {
       const token = localStorage.getItem("token");
 
       await axios.post(
-        "http://localhost:5000/api/jobs",
+         "https://job-portal-omfp.onrender.com/api/jobs",
         { title, company, description },
         { headers: { Authorization: `Bearer ${token}` } }
       );

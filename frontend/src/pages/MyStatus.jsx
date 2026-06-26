@@ -13,7 +13,7 @@ export default function MyStatus() {
     if (!userId) return;
     const loadStatus = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/my-applications/${userId}`);
+        const res = await axios.get(`https://job-portal-omfp.onrender.com/api/my-applications/${userId}`);
         setApplications(res.data || []);
       } catch (err) {
         console.log(err);

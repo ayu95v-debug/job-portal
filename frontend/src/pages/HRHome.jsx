@@ -18,7 +18,7 @@ export default function HRHome() {
 
   const fetchDashboard = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:5000/api/hr/jobs", {
+      const res = await axios.get("https://job-portal-omfp.onrender.com/api/hr/jobs", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -31,7 +31,7 @@ export default function HRHome() {
 
   const updateStatus = async (appId, status) => {
     await axios.put(
-      "http://127.0.0.1:5000/api/applications/status",
+      "https://job-portal-omfp.onrender.com/api/applications/status",
       { appId, status },
       { headers: { Authorization: `Bearer ${token}` } }
     );

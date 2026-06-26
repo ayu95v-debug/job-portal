@@ -46,7 +46,7 @@ export default function Login() {
       formData.append("resume", pendingResume);
 
       const uploadRes = await axios.post(
-        `http://localhost:5000/api/auth/upload-resume/${user.id}`,
+        `https://job-portal-omfp.onrender.com/api/auth/upload-resume/${user.id}`,
         formData
       );
 
@@ -74,14 +74,10 @@ export default function Login() {
     setMessage("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+      const res = await axios.post("https://job-portal-omfp.onrender.com/api/auth/login", { email, password });
       await finishLogin(res.data);
     } catch (err) {
       const data = err.response?.data;
-      if (data?.requiresVerification) {
-        navigate(`/verify-email?email=${encodeURIComponent(email)}`);
-        return;
-      }
       setMessage(data?.msg || "Login failed");
     } finally {
       setLoading(false);

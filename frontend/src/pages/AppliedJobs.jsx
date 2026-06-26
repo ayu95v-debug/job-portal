@@ -12,7 +12,7 @@ export default function AppliedJobs() {
   useEffect(() => {
     if (!userId) return;
     const loadAppliedJobs = async () => {
-      const res = await axios.get(`http://localhost:5000/api/applied/${userId}`);
+      const res = await axios.get(`https://job-portal-omfp.onrender.com/api/applied/${userId}`);
       setJobs(res.data || []);
     };
     loadAppliedJobs();

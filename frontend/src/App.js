@@ -11,7 +11,6 @@ import HRDashboard from "./pages/HRDashboard";
 import PrivateRoute from "./components/PrivateRoute";
 // import HRHome from "./pages/HRHome";
 import Signup from "./pages/Signup";
-import VerifyEmail from "./pages/VerifyEmail";
 import ForgotPassword from "./pages/ForgotPassword";
 import MyStatus from "./pages/MyStatus";
 import AppliedJobs from "./pages/AppliedJobs"; 
@@ -37,7 +36,6 @@ function App() {
                {/* <Route path="/HRDashboard" element={<HRDashboard />} />  */}
 
       <Route path="/signup" element={<Signup />} />
-      <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/status" element={<MyStatus />} />
       <Route path="/applied" element={<AppliedJobs />} />

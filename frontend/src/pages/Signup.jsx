@@ -23,11 +23,9 @@ export default function Signup() {
     setMessage("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/signup", form);
+      const res = await axios.post("https://job-portal-omfp.onrender.com/api/auth/signup", form);
       setMessage(res.data.msg);
-      navigate(
-        `/verify-email?email=${encodeURIComponent(form.email)}${res.data.devOtp ? `&devOtp=${res.data.devOtp}` : ""}`
-      );
+      navigate("/login");
     } catch (err) {
       setMessage(err.response?.data?.msg || "Signup failed");
     } finally {
@@ -39,7 +37,7 @@ export default function Signup() {
     <div className="auth-page">
       <form className="auth-card app-form" onSubmit={handleSignup}>
         <h2>Signup</h2>
-        <p className="auth-subtitle">Account create karo, phir email OTP se verify karo.</p>
+        <p className="auth-subtitle">Account create karo, phir login karo.</p>
 
         <input
           type="text"
@@ -78,12 +76,12 @@ export default function Signup() {
         {message && <p className="auth-message">{message}</p>}
 
         <button type="submit" className="app-btn" disabled={loading}>
-          {loading ? "Please wait..." : "Signup & Send OTP"}
+          {loading ? "Please wait..." : "Signup"}
         </button>
 
         <div className="auth-links">
           <button type="button" onClick={() => navigate("/login")}>
-            Already verified? Login
+            Already have an account? Login
           </button>
         </div>
       </form>

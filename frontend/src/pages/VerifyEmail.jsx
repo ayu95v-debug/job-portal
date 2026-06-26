@@ -18,7 +18,7 @@ export default function VerifyEmail() {
     setMessage("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/verify-email", { email, otp });
+      const res = await axios.post("https://job-portal-omfp.onrender.com/api/auth/verify-email", { email, otp });
       alert(res.data.msg);
       navigate("/login");
     } catch (err) {
@@ -34,7 +34,7 @@ export default function VerifyEmail() {
     setDevOtp("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/resend-verification", { email });
+      const res = await axios.post("https://job-portal-omfp.onrender.com/api/auth/resend-verification", { email });
       setMessage(res.data.msg);
       setDevOtp(res.data.devOtp || "");
     } catch (err) {

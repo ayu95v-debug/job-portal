@@ -20,7 +20,7 @@ export default function ForgotPassword() {
     setDevOtp("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
+      const res = await axios.post("https://job-portal-omfp.onrender.com/api/auth/forgot-password", { email });
       setStep("reset");
       setMessage(res.data.msg);
       setDevOtp(res.data.devOtp || "");
@@ -37,7 +37,7 @@ export default function ForgotPassword() {
     setMessage("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/reset-password", {
+      const res = await axios.post("https://job-portal-omfp.onrender.com/api/auth/reset-password", {
         email,
         otp,
         password,
