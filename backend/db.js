@@ -1,15 +1,35 @@
-const mysql = require("mysql");
+// const mysql = require("mysql");
+
+// const db = mysql.createConnection({
+//   host: "localhost",
+//   user: "root",
+//   password: "Ayush123",      // apna MySQL password
+//   database: "job_portal"
+// });
+
+// db.connect(err => {
+//   if (err) {
+//     console.log("DB Error:", err);
+//   } else {
+//     console.log("MySQL Connected");
+//   }
+// });
+
+// module.exports = db;
+
+const mysql = require("mysql2");
 
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "Ayush123",      // apna MySQL password
-  database: "job_portal"
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT
 });
 
-db.connect(err => {
+db.connect((err) => {
   if (err) {
-    console.log("DB Error:", err);
+    console.error("DB Error:", err);
   } else {
     console.log("MySQL Connected");
   }
