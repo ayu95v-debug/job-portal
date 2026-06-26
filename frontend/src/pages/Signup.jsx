@@ -3,8 +3,9 @@ import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "./AppPages.css";
 
-const API = window.location.hostname === 
- "https://job-portal-omfp.onrender.com";
+const API = window.location.hostname === "localhost"
+  ? "http://localhost:5000"
+  : "https://job-portal-omfp.onrender.com";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -27,15 +28,19 @@ export default function Signup() {
 
     try {
       let authData = {};
-      const signupRes = await axios.post(`${API}/api/auth/signup`, form);
+      const signupRes = await axios.post(`${API}/api/auth/signup`, form, { timeout: 15000 });
 
       if (signupRes.data.token && signupRes.data.user) {
         authData = signupRes.data;
       } else {
-        const loginRes = await axios.post(`${API}/api/auth/login`, {
-          email: form.email,
-          password: form.password,
-        });
+        const loginRes = await axios.post(
+          `${API}/api/auth/login`,
+          {
+            email: form.email,
+            password: form.password,
+          },
+          { timeout: 15000 }
+        );
         authData = loginRes.data;
       }
 
@@ -57,6 +62,7 @@ export default function Signup() {
     } catch (err) {
       setMessage(
         err.response?.data?.msg ||
+          (err.code === "ECONNABORTED" ? "Signup request timed out. Backend/DB is taking too long." : "") ||
           (err.request ? "Backend is not running or not reachable. Please restart backend." : "Signup failed")
       );
     } finally {
