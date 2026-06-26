@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./AppPages.css";
 
+const API = window.location.hostname === "localhost"
+  ? "http://localhost:5000"
+  : "https://job-portal-omfp.onrender.com";
+
 function pendingResumeToFile() {
   const dataUrl = sessionStorage.getItem("pendingResumeDataUrl");
   const fileName = sessionStorage.getItem("pendingResumeFileName") || "resume.pdf";
@@ -46,7 +50,7 @@ export default function Login() {
       formData.append("resume", pendingResume);
 
       const uploadRes = await axios.post(
-        `https://job-portal-omfp.onrender.com/api/auth/upload-resume/${user.id}`,
+        `${API}/api/auth/upload-resume/${user.id}`,
         formData
       );
 
@@ -74,7 +78,7 @@ export default function Login() {
     setMessage("");
 
     try {
-      const res = await axios.post("https://job-portal-omfp.onrender.com/api/auth/login", { email, password });
+      const res = await axios.post(`${API}/api/auth/login`, { email, password });
       await finishLogin(res.data);
     } catch (err) {
       const data = err.response?.data;

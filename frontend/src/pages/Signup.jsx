@@ -3,6 +3,10 @@ import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "./AppPages.css";
 
+const API = window.location.hostname === "localhost"
+  ? "http://localhost:5000"
+  : "https://job-portal-omfp.onrender.com";
+
 export default function Signup() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -23,9 +27,34 @@ export default function Signup() {
     setMessage("");
 
     try {
-      const res = await axios.post("https://job-portal-omfp.onrender.com/api/auth/signup", form);
-      setMessage(res.data.msg);
-      navigate("/login");
+      let authData = {};
+      const signupRes = await axios.post(`${API}/api/auth/signup`, form);
+
+      if (signupRes.data.token && signupRes.data.user) {
+        authData = signupRes.data;
+      } else {
+        const loginRes = await axios.post(`${API}/api/auth/login`, {
+          email: form.email,
+          password: form.password,
+        });
+        authData = loginRes.data;
+      }
+
+      const user = authData.user;
+      const userRole = (user.role || "").toLowerCase();
+      const updatedUser = { ...user, role: userRole };
+
+      localStorage.setItem("token", authData.token);
+      localStorage.setItem("userId", user.id);
+      localStorage.setItem("email", user.email);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      localStorage.setItem("role", updatedUser.role);
+
+      if (updatedUser.role === "employer" || updatedUser.role === "hr") {
+        navigate("/hr-dashboard", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
     } catch (err) {
       setMessage(err.response?.data?.msg || "Signup failed");
     } finally {
