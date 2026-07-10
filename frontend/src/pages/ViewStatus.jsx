@@ -14,7 +14,7 @@ function ViewStatus() {
   }, []);
 
   const load = async () => {
-    const res = await axios.get("https://job-portal-omfp.onrender.com/api/my-status", {
+    const res = await axios.get(`${API}/api/my-status`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setData(res.data || []);

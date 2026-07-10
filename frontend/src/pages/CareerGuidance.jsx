@@ -2,6 +2,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 const skillTerms = [
+  "c",
+  "c language",
+  "c programming",
+  "cpp",
+  "c++",
   "python",
   "sql",
   "aws",
@@ -70,6 +75,10 @@ function mapCoursesForSkills(skills) {
   const courses = new Set();
 
   skills.forEach((skill) => {
+    if (["c", "c language", "c programming", "cpp", "c++"].includes(skill)) {
+      courses.add("C Programming Fundamentals");
+      courses.add("Low-Level Programming and Memory Management");
+    }
     if (["python", "sql", "data science", "machine learning", "ai", "analytics"].includes(skill)) {
       courses.add("Python and SQL for Data Roles");
       courses.add("Intro to Machine Learning");
@@ -77,6 +86,10 @@ function mapCoursesForSkills(skills) {
     if (["react", "node", "javascript", "typescript"].includes(skill)) {
       courses.add("Modern Web Development with React");
       courses.add("Backend APIs with Node.js");
+    }
+    if (["html", "css"].includes(skill)) {
+      courses.add("HTML5 and CSS3 Fundamentals");
+      courses.add("Responsive Web Design");
     }
     if (["aws", "docker", "kubernetes", "devops"].includes(skill)) {
       courses.add("Cloud and DevOps Foundations");

@@ -3,9 +3,7 @@ import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "./AppPages.css";
 
-const API = window.location.hostname === "localhost"
-  ? "http://localhost:5000"
-  : "https://job-portal-omfp.onrender.com";
+const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 export default function Signup() {
   const navigate = useNavigate();

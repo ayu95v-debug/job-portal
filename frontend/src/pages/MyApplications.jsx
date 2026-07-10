@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import NotificationsPanel from "../components/NotificationsPanel";
@@ -18,7 +19,7 @@ function MyApplications() {
     }
 
     axios
-      .get(`https://job-portal-omfp.onrender.com/api/my-applications/${userId}`)
+      .get(`${API}/api/my-applications/${userId}`)
       .then((res) => setApps(res.data || []))
       .catch(() => alert("Failed to load applications"));
   }, [navigate, userId]);

@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -23,6 +24,7 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.16.1",
     "nodemailer": "^8.0.2",
+    "pdf-parse": "^2.4.5",
     "react-router-dom": "^7.12.0"
   }
 }

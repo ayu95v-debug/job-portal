@@ -70,6 +70,8 @@ const express = require("express");
 const router = express.Router();
 const path = require("path");
 const multer = require("multer");
+const fs = require("fs");
+const { PDFParse } = require("pdf-parse");
 const db = require("../db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -182,6 +184,31 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// 📄 Extract text from PDF resume files
+async function extractTextFromPdf(filePath) {
+  try {
+    if (!filePath || !fs.existsSync(filePath)) {
+      console.log("⚠️ Resume file not found:", filePath);
+      return "";
+    }
+    
+    const fileBuffer = fs.readFileSync(filePath);
+    const parser = new PDFParse({ data: fileBuffer });
+    let data;
+    try {
+      data = await parser.getText();
+    } finally {
+      await parser.destroy();
+    }
+    const text = data.text || "";
+    console.log(`✅ Extracted ${text.length} chars from PDF resume`);
+    return text;
+  } catch (error) {
+    console.error("❌ PDF extraction error:", error.message);
+    return "";
+  }
+}
+
 const stopWords = new Set([
   "and","the","for","with","this","that","from","your","you","are","have","has","will","our","their","they","them","which","those","where","when","what","who","how","why","is","in","on","at","by","to","of","a","an","or","as","it","job","jobs","resume","candidate","experience","skills","years","year","month","months","working","worked","work","strong","good","excellent"
 ]);
@@ -189,9 +216,10 @@ const stopWords = new Set([
 // Common skills and aliases for better matching. Users and HRs write the same
 // skill in many ways, e.g. "Node.js", "node js", "nodejs", or "MERN".
 const skillAliases = {
+  c: ["c language", "c programming"],
+  python: ["python", "py"],
   javascript: ["javascript", "java script", "js", "ecmascript"],
   typescript: ["typescript", "type script", "ts"],
-  python: ["python", "py"],
   java: ["java"],
   csharp: ["c#", "c sharp", "csharp"],
   cpp: ["c++", "cpp", "c plus plus"],
@@ -369,7 +397,7 @@ function scoreJob(job, skills) {
   return { score: Math.max(score, 0), matchedSkills };
 }
 
-/* ================= VERIFIED AUTH FLOW ================= */
+/* ================= AUTH FLOW ================= */
 router.post("/signup", async (req, res) => {
   const { name, email, password, role, linkedin, qualifications, about } = req.body;
 
@@ -383,119 +411,40 @@ router.post("/signup", async (req, res) => {
 
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
-      const otp = createOtp();
-      const otpHash = await hashOtp(otp);
-      const otpExpires = toMysqlDate(new Date(Date.now() + OTP_TTL_MS));
 
       db.query(
         `INSERT INTO users
           (name, email, password, role, linkedin, qualifications, about, is_email_verified, email_verification_otp_hash, email_verification_otp_expires)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`,
-        [name, email, hashedPassword, role, linkedin || "", qualifications || "", about || "", otpHash, otpExpires],
-        async (insertErr) => {
+         VALUES (?, ?, ?, ?, ?, ?, ?, 1, NULL, NULL)`,
+        [name, email, hashedPassword, role, linkedin || "", qualifications || "", about || ""],
+        (insertErr, insertResult) => {
           if (insertErr) return res.status(500).json({ msg: insertErr.message });
 
-          try {
-            const emailResult = await sendOtpEmail(
-              email,
-              "Verify your Job Portal account",
-              otp,
-              "email verification"
-            );
+          const user = {
+            id: insertResult.insertId,
+            name,
+            email,
+            role,
+            linkedin: linkedin || "",
+            qualifications: qualifications || "",
+            about: about || "",
+            is_email_verified: 1,
+            email_verification_otp_hash: null,
+            email_verification_otp_expires: null,
+          };
+          const token = signToken(user);
 
-            res.json({
-              msg: emailResult.sent
-                ? "Signup successful. Verification OTP sent to your email."
-                : "Signup successful. Email config missing, dev OTP logged in backend console.",
-              requiresVerification: true,
-              devOtp: emailResult.devOtp,
-            });
-          } catch (mailErr) {
-            console.log("MAIL ERROR:", mailErr);
-            res.status(500).json({ msg: "Signup saved, but verification email could not be sent" });
-          }
+          res.json({
+            msg: "Signup successful.",
+            token,
+            user: sanitizeUser(user),
+          });
         }
       );
     } catch (error) {
       console.log("SIGNUP ERROR:", error);
       res.status(500).json({ msg: "Server error" });
     }
-  });
-});
-
-router.post("/verify-email", (req, res) => {
-  const { email, otp } = req.body;
-
-  if (!email || !otp) {
-    return res.status(400).json({ msg: "Email and OTP are required" });
-  }
-
-  db.query("SELECT * FROM users WHERE email = ?", [email], async (err, result) => {
-    if (err) return res.status(500).json({ msg: err.message });
-    if (result.length === 0) return res.status(404).json({ msg: "User not found" });
-
-    const user = result[0];
-    const valid = await verifyOtp(
-      otp,
-      user.email_verification_otp_hash,
-      user.email_verification_otp_expires
-    );
-
-    if (!valid) return res.status(400).json({ msg: "Invalid or expired verification OTP" });
-
-    db.query(
-      `UPDATE users
-       SET is_email_verified = 1,
-           email_verification_otp_hash = NULL,
-           email_verification_otp_expires = NULL
-       WHERE id = ?`,
-      [user.id],
-      (updateErr) => {
-        if (updateErr) return res.status(500).json({ msg: updateErr.message });
-        res.json({ msg: "Email verified successfully. You can login now." });
-      }
-    );
-  });
-});
-
-router.post("/resend-verification", (req, res) => {
-  const { email } = req.body;
-
-  if (!email) return res.status(400).json({ msg: "Email is required" });
-
-  db.query("SELECT * FROM users WHERE email = ?", [email], async (err, result) => {
-    if (err) return res.status(500).json({ msg: err.message });
-    if (result.length === 0) return res.status(404).json({ msg: "User not found" });
-    if (Number(result[0].is_email_verified) === 1) {
-      return res.status(400).json({ msg: "Email is already verified" });
-    }
-
-    const otp = createOtp();
-    const otpHash = await hashOtp(otp);
-    const otpExpires = toMysqlDate(new Date(Date.now() + OTP_TTL_MS));
-
-    db.query(
-      "UPDATE users SET email_verification_otp_hash = ?, email_verification_otp_expires = ? WHERE email = ?",
-      [otpHash, otpExpires, email],
-      async (updateErr) => {
-        if (updateErr) return res.status(500).json({ msg: updateErr.message });
-
-        try {
-          const emailResult = await sendOtpEmail(
-            email,
-            "Your new Job Portal verification OTP",
-            otp,
-            "email verification"
-          );
-          res.json({
-            msg: emailResult.sent ? "Verification OTP sent again." : "Email config missing, dev OTP logged in backend console.",
-            devOtp: emailResult.devOtp,
-          });
-        } catch (mailErr) {
-          res.status(500).json({ msg: "Could not send verification email" });
-        }
-      }
-    );
   });
 });
 
@@ -509,14 +458,6 @@ router.post("/login", (req, res) => {
     const user = result[0];
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ msg: "Wrong password" });
-
-    const hasPendingSignupVerification = Boolean(user.email_verification_otp_hash);
-    if (Number(user.is_email_verified) !== 1 && hasPendingSignupVerification) {
-      return res.status(403).json({
-        msg: "Please verify your email before login",
-        requiresVerification: true,
-      });
-    }
 
     const token = signToken(user);
     res.json({ token, user: sanitizeUser(user) });
@@ -756,9 +697,9 @@ router.get("/recommend-jobs/:userId", (req, res) => {
   console.log("\n=== 🔍 RECOMMEND JOBS ENDPOINT ===");
   console.log("Recommend jobs called for userId:", userId);
   
-  const profileSql = "SELECT qualifications, about, linkedin FROM users WHERE id = ?";
+  const profileSql = "SELECT qualifications, about, linkedin, resume_url FROM users WHERE id = ?";
 
-  db.query(profileSql, [userId], (err, users) => {
+  db.query(profileSql, [userId], async (err, users) => {
     if (err) {
       console.error("❌ Profile fetch error:", err);
       return res.status(500).json({ msg: "Error fetching profile", error: err.message });
@@ -773,12 +714,21 @@ router.get("/recommend-jobs/:userId", (req, res) => {
     console.log("   Qualifications:", user.qualifications?.substring(0, 60) || "EMPTY");
     console.log("   About:", user.about?.substring(0, 60) || "EMPTY");
     console.log("   LinkedIn:", user.linkedin?.substring(0, 60) || "EMPTY");
+    console.log("   Resume URL:", user.resume_url || "NOT UPLOADED");
     
-    const profileText = [user.qualifications, user.about, user.linkedin]
+    // 📄 Extract text from resume PDF if available
+    let resumeText = "";
+    if (user.resume_url) {
+      const resumePath = path.join(__dirname, "..", "uploads", path.basename(user.resume_url));
+      console.log("📂 Looking for resume at:", resumePath);
+      resumeText = await extractTextFromPdf(resumePath);
+    }
+    
+    const profileText = [user.qualifications, user.about, user.linkedin, resumeText]
       .filter(Boolean)
       .join(" ");
 
-    console.log("📄 Profile text length:", profileText.length);
+    console.log("📄 Profile text length:", profileText.length, "(includes resume)");
     const skills = extractSkills(profileText);
     console.log("📝 Final extracted skills:", skills.length, "skills -", skills.slice(0, 8));
     
@@ -787,10 +737,11 @@ router.get("/recommend-jobs/:userId", (req, res) => {
       : "Update your profile with skills for better job recommendations.";
 
     // 🚀 Try to use cached jobs first
-    let jobs = null;
+    let jobs = cache.getJobs();
     
     if (jobs) {
       // Use cached jobs - process recommendations immediately
+      console.log("⚡ Using cached jobs");
       processRecommendations(jobs);
     } else {
       // Fetch from database if cache is empty
@@ -802,6 +753,7 @@ router.get("/recommend-jobs/:userId", (req, res) => {
         }
         // Cache the jobs for next requests
         cache.setJobs(dbJobs);
+        console.log("💾 Fresh jobs fetched from DB and cached");
         processRecommendations(dbJobs);
       });
     }
@@ -835,12 +787,25 @@ router.get("/recommend-jobs/:userId", (req, res) => {
 
       // Filter: Only show jobs with score > 0 (at least 1 skill match)
       const relevantJobs = scoredJobs.filter((job) => job.score > 0);
-      console.log(`🔥 Relevant jobs found: ${relevantJobs.length}`);
       
-      // If no relevant jobs, show top scored anyway
-      const results = relevantJobs.length > 0 
-        ? relevantJobs.slice(0, 8) 
-        : scoredJobs.slice(0, 5);
+      // If no relevant jobs found, determine what to return
+      let results;
+      let message;
+      
+      if (relevantJobs.length > 0) {
+        results = relevantJobs.slice(0, 8);
+        message = analysis;
+      } else if (skills.length === 0) {
+        // No profile skills extracted - show all jobs with explanation
+        results = scoredJobs.slice(0, 10);
+        message = "📝 Complete your profile with your skills and experience to see better job matches!";
+        console.log("ℹ️ No skills in profile, showing all jobs");
+      } else {
+        // Skills extracted but no matches - show top scored jobs
+        results = scoredJobs.slice(0, 5);
+        message = "🔍 No exact matches found yet. Here are some jobs you might be interested in:";
+        console.log("ℹ️ No matching jobs found with extracted skills");
+      }
 
       console.log("✨ Returning", results.length, "recommended jobs");
       console.log("=== END RECOMMEND JOBS ===\n");
@@ -848,7 +813,7 @@ router.get("/recommend-jobs/:userId", (req, res) => {
       res.json({
         recommendedJobs: results,
         skills,
-        analysis,
+        analysis: message,
       });
     }
   });

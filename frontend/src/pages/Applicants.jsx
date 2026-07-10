@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import API from "../api";
 import "./AppPages.css";
 
 function Applicants() {
@@ -12,7 +13,7 @@ function Applicants() {
 
   const load = () => {
     axios
-         .get(`https://job-portal-omfp.onrender.com/api/jobs/${jobId}/applicants`, {
+         .get(`${API}/api/jobs/${jobId}/applicants`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setApps(res.data || []))
@@ -23,7 +24,7 @@ function Applicants() {
 
   const update = async (appId, status) => {
     await axios.put(
-      `https://job-portal-omfp.onrender.com/api/applications/status`,
+      `${API}/api/applications/status`,
       { appId, status },
       { headers: { Authorization: `Bearer ${token}` } }
     );

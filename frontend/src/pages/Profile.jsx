@@ -28,6 +28,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
 import Navbar from "../components/Navbar";
 import "./AppPages.css";
 
@@ -56,7 +57,7 @@ export default function Profile() {
 
     setLoading(true);
     axios
-      .get(`https://job-portal-omfp.onrender.com/api/auth/profile/${userId}`)
+      .get(`${API}/api/auth/profile/${userId}`)
       .then((res) => {
         setProfile(res.data);
         localStorage.setItem("user", JSON.stringify({ ...storedUser, ...res.data }));
@@ -75,7 +76,7 @@ export default function Profile() {
 
     try {
       setRecommendLoading(true);
-      const res = await axios.get(`https://job-portal-omfp.onrender.com/api/auth/recommend-jobs/${userId}`);
+      const res = await axios.get(`${API}/api/auth/recommend-jobs/${userId}`);
       setRecommendations(res.data.recommendedJobs || []);
       setAnalysisText(res.data.analysis || "");
     } catch (err) {
@@ -101,7 +102,7 @@ export default function Profile() {
     try {
       setLoading(true);
       const res = await axios.put(
-        `https://job-portal-omfp.onrender.com/api/auth/profile/${userId}`,
+        `${API}/api/auth/profile/${userId}`,
         {
           name: profile.name,
           linkedin: profile.linkedin,
@@ -136,7 +137,7 @@ export default function Profile() {
     try {
       setLoading(true);
       const res = await axios.post(
-        `https://job-portal-omfp.onrender.com/api/auth/upload-resume/${userId}`,
+        `${API}/api/auth/upload-resume/${userId}`,
         formData
       );
       const updatedProfile = { ...profile, resume_url: res.data.resume_url };
@@ -156,7 +157,7 @@ export default function Profile() {
   };
 
   const resumeLink = profile.resume_url
-    ? `https://job-portal-omfp.onrender.com${profile.resume_url}`
+    ? `${API}${profile.resume_url}`
     : null;
 
   return (
@@ -287,7 +288,7 @@ export default function Profile() {
                                 setMessage("Please login first to apply.");
                                 return;
                               }
-                              await axios.post("http://localhost:5000/api/apply", {
+                              await axios.post(`${API}/api/apply`, {
                                 jobId: job.id,
                                 userId: currentUser.id,
                               });

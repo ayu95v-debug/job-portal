@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
 import Navbar from "../components/Navbar";
 import NotificationsPanel from "../components/NotificationsPanel";
 import "./AppPages.css";
@@ -13,7 +14,7 @@ export default function MyStatus() {
     if (!userId) return;
     const loadStatus = async () => {
       try {
-        const res = await axios.get(`https://job-portal-omfp.onrender.com/api/my-applications/${userId}`);
+        const res = await axios.get(`${API}/api/my-applications/${userId}`);
         setApplications(res.data || []);
       } catch (err) {
         console.log(err);

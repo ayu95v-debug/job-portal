@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API from "../api";
 import "./AppPages.css";
 
 export default function ForgotPassword() {
@@ -20,7 +21,7 @@ export default function ForgotPassword() {
     setDevOtp("");
 
     try {
-      const res = await axios.post("https://job-portal-omfp.onrender.com/api/auth/forgot-password", { email });
+      const res = await axios.post(`${API}/api/auth/forgot-password`, { email });
       setStep("reset");
       setMessage(res.data.msg);
       setDevOtp(res.data.devOtp || "");
@@ -37,7 +38,7 @@ export default function ForgotPassword() {
     setMessage("");
 
     try {
-      const res = await axios.post("https://job-portal-omfp.onrender.com/api/auth/reset-password", {
+      const res = await axios.post(`${API}/api/auth/reset-password`, {
         email,
         otp,
         password,

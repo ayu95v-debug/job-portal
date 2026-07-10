@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import API from "../api";
 import { useNavigate } from "react-router-dom";
 import {
   Bar,
@@ -15,7 +16,6 @@ import {
 } from "recharts";
 import "./Dashboard.css";
 
-const API = "https://job-portal-omfp.onrender.com";
 const STATUS_COLORS = {
   Selected: "#0f766e",
   Rejected: "#dc2626",

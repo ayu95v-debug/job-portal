@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
-require("dotenv").config();
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 const db = require("./db");
@@ -39,12 +39,16 @@ profileColumns.forEach((column) => {
 
 db.query(
   `UPDATE users
-   SET is_email_verified = 1
-   WHERE (is_email_verified IS NULL OR is_email_verified = 0)
-     AND email_verification_otp_hash IS NULL`,
+   SET is_email_verified = 1,
+       email_verification_otp_hash = NULL,
+       email_verification_otp_expires = NULL
+   WHERE is_email_verified IS NULL
+      OR is_email_verified = 0
+      OR email_verification_otp_hash IS NOT NULL
+      OR email_verification_otp_expires IS NOT NULL`,
   (err) => {
     if (err) {
-      console.log("Could not mark legacy users verified:", err.message);
+      console.log("Could not disable pending email verification:", err.message);
     }
   }
 );
@@ -240,8 +244,9 @@ app.put("/api/notifications/read/:id", (req, res) => {
 });
 
 // ✅ Start server
-app.listen(5000, "0.0.0.0", () => {
-  console.log("Server running on http://127.0.0.1:5000");
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 

@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API from "../api";
 import "./AppPages.css";
-
-const API = window.location.hostname === "localhost"
-  ? "http://localhost:5000"
-  : "https://job-portal-omfp.onrender.com";
 
 function pendingResumeToFile() {
   const dataUrl = sessionStorage.getItem("pendingResumeDataUrl");

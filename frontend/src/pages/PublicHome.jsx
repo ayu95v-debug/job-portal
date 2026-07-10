@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API from "../api";
 import Navbar from "../components/Navbar";
 import "./PublicHome.css";
 
@@ -18,7 +19,7 @@ export default function PublicHome() {
   const fetchAllJobs = async () => {
     try {
       setJobsLoading(true);
-      const response = await axios.get("https://job-portal-omfp.onrender.com/api/jobs");
+      const response = await axios.get(`${API}/api/jobs`);
       setJobs(response.data || []);
     } catch (err) {
       console.error("Error fetching jobs:", err);
@@ -126,7 +127,7 @@ export default function PublicHome() {
     try {
       setLoading(true);
       const res = await axios.post(
-        `https://job-portal-omfp.onrender.com/api/auth/upload-resume/${userId}`,
+        `${API}/api/auth/upload-resume/${userId}`,
         formData
       );
       setMessage("Resume uploaded successfully.");

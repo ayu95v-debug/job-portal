@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import "./AppPages.css";
@@ -24,7 +25,7 @@ export default function Jobs() {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("https://job-portal-omfp.onrender.com/api/jobs");
+      const res = await axios.get(`${API}/api/jobs`);
       setJobs(res.data || []);
     } catch (err) {
       console.log(err);
@@ -35,7 +36,7 @@ export default function Jobs() {
 
   const fetchRecommendations = async (userId) => {
     try {
-      const res = await axios.get(`https://job-portal-omfp.onrender.com/api/auth/recommend-jobs/${userId}`);
+      const res = await axios.get(`${API}/api/auth/recommend-jobs/${userId}`);
       const recommendations = res.data?.recommendedJobs || [];
       const scores = {};
       const skills = {};
@@ -61,7 +62,7 @@ export default function Jobs() {
         return;
       }
 
-      const res = await axios.post("https://job-portal-omfp.onrender.com/api/apply", {
+      const res = await axios.post(`${API}/api/apply`, {
         jobId,
         userId: user.id,
       });

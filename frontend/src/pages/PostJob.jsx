@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import API from "../api";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import "./AppPages.css";
@@ -16,7 +17,7 @@ function PostJob() {
       const token = localStorage.getItem("token");
 
       await axios.post(
-         "https://job-portal-omfp.onrender.com/api/jobs",
+         `${API}/api/jobs`,
         { title, company, description },
         { headers: { Authorization: `Bearer ${token}` } }
       );

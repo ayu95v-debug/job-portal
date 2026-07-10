@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import "./AppPages.css";
@@ -18,7 +19,7 @@ export default function HRHome() {
 
   const fetchDashboard = async () => {
     try {
-      const res = await axios.get("https://job-portal-omfp.onrender.com/api/hr/jobs", {
+      const res = await axios.get(`${API}/api/hr/jobs`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -31,7 +32,7 @@ export default function HRHome() {
 
   const updateStatus = async (appId, status) => {
     await axios.put(
-      "https://job-portal-omfp.onrender.com/api/applications/status",
+      `${API}/api/applications/status`,
       { appId, status },
       { headers: { Authorization: `Bearer ${token}` } }
     );

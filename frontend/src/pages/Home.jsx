@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import API from "../api";
 import "./Dashboard.css";
 
 export default function Home() {
@@ -36,7 +37,7 @@ export default function Home() {
     try {
       setRecommendLoading(true);
       console.log("Fetching recommendations for user:", user.id);
-      const response = await axios.get(`http://localhost:5000/api/auth/recommend-jobs/${user.id}`);
+      const response = await axios.get(`${API}/api/auth/recommend-jobs/${user.id}`);
       console.log("Recommendations response:", response.data);
       
       if (!response.data) {
@@ -51,7 +52,7 @@ export default function Home() {
       
       // Show all jobs as fallback
       try {
-        const fallbackRes = await axios.get(`http://localhost:5000/api/jobs`);
+        const fallbackRes = await axios.get(`${API}/api/jobs`);
         setRecommendations(fallbackRes.data || []);
         setAnalysisText("Showing all available jobs. Update your profile for personalized recommendations.");
       } catch (fallbackErr) {
@@ -79,7 +80,7 @@ export default function Home() {
     try {
       setLoading(true);
       const res = await axios.post(
-        "https://job-portal-omfp.onrender.com/api/auth/upload-resume/${user.id}",
+        `${API}/api/auth/upload-resume/${user.id}`,
         formData
       );
       setMessage("✅ Resume uploaded successfully!");
@@ -240,7 +241,7 @@ export default function Home() {
                       <button
                         onClick={async () => {
                           try {
-                            await axios.post("https://job-portal-omfp.onrender.com/api/apply", {
+                            await axios.post(`${API}/api/apply`, {
                               jobId: job.id,
                               userId: user.id,
                             });
