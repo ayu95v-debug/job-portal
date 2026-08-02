@@ -46,10 +46,26 @@ pool.on("error", (err) => {
 // Query Helper
 const query = async (text, params) => {
   try {
+    console.log("\n==============================");
+    console.log("SQL QUERY:");
+    console.log(text);
+    console.log("PARAMS:", params);
+    console.log("==============================\n");
+
     return await pool.query(text, params);
+
   } catch (err) {
-    console.error("❌ Query Error");
+
+    console.error("\n========== SQL ERROR ==========");
+    console.error("Query:");
+    console.error(text);
+
+    console.error("Params:");
+    console.error(params);
+
     console.error(err);
+    console.error("===============================\n");
+
     throw err;
   }
 };
