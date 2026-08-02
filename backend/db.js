@@ -1,80 +1,60 @@
-// const mysql = require("mysql");
+require("dotenv").config();
 
-// const db = mysql.createConnection({
-//   host: "localhost",
-//   user: "root",
-//   password: "Ayush123",      // apna MySQL password
-//   database: "job_portal"
-// });
+const { Pool } = require("pg");
 
-// db.connect(err => {
-//   if (err) {
-//     console.log("DB Error:", err);
-//   } else {
-//     console.log("MySQL Connected");
-//   }
-// });
+// Check DATABASE_URL exists
+if (!process.env.DATABASE_URL) {
+  console.error("❌ DATABASE_URL is missing in .env file");
+  process.exit(1);
+}
 
-// module.exports = db;
+// Create PostgreSQL Pool
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 
-const mysql = require("mysql2");
-const databaseUrl = process.env.DATABASE_URL || process.env.MYSQL_PUBLIC_URL;
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
 
-const hasDbConfig =
-  Boolean(databaseUrl) ||
-  Boolean(process.env.DB_HOST && process.env.DB_USER && process.env.DB_NAME);
+// Test Connection
+(async () => {
+  try {
+    const client = await pool.connect();
 
-function getCallback(args) {
-  for (let i = args.length - 1; i >= 0; i -= 1) {
-    if (typeof args[i] === "function") return args[i];
+    console.log("✅ Connected to Supabase PostgreSQL");
+
+    const result = await client.query("SELECT NOW()");
+    console.log("📅 Database Time:", result.rows[0].now);
+
+    client.release();
+  } catch (err) {
+    console.error("❌ PostgreSQL Connection Error:");
+    console.error(err);
   }
-  return null;
-}
+})();
 
-if (!hasDbConfig) {
-  const configError = new Error(
-    "Database config missing. Add DATABASE_URL or MYSQL_PUBLIC_URL in backend/.env"
-  );
-  console.error("DB Error:", configError.message);
+// Handle unexpected pool errors
+pool.on("error", (err) => {
+  console.error("❌ Unexpected PostgreSQL Error");
+  console.error(err);
+});
 
-  module.exports = {
-    query: (...args) => {
-      const callback = getCallback(args);
-      if (callback) process.nextTick(() => callback(configError));
-    },
-  };
-} else {
-  const dbConfig = databaseUrl
-    ? databaseUrl
-    : {
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
-        port: process.env.DB_PORT || 3306,
-        connectTimeout: 10000,
-      };
+// Query Helper
+const query = async (text, params) => {
+  try {
+    return await pool.query(text, params);
+  } catch (err) {
+    console.error("❌ Query Error");
+    console.error(err);
+    throw err;
+  }
+};
 
-  const db = mysql.createConnection(dbConfig);
-  const originalQuery = db.query.bind(db);
-
-  db.query = (...args) => {
-    const callback = getCallback(args);
-    if (db.connectionError && callback) {
-      process.nextTick(() => callback(db.connectionError));
-      return undefined;
-    }
-    return originalQuery(...args);
-  };
-
-  db.connect((err) => {
-    if (err) {
-      db.connectionError = err;
-      console.error("DB Error:", err);
-    } else {
-      console.log("MySQL Connected");
-    }
-  });
-
-  module.exports = db;
-}
+module.exports = {
+  query,
+  pool,
+};

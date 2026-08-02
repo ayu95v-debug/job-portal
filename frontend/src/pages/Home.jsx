@@ -164,6 +164,17 @@ export default function Home() {
             >
               {loading ? "⏳ Uploading..." : "🚀 Upload & Get Recommendations"}
             </button>
+            
+           <button
+           onClick={() => navigate("/jobs")}
+           style={{
+           ...styles.uploadButton,
+           marginTop: "15px",
+           background: "#2563eb",
+           }}
+>
+  🔍 Get All Jobs
+</button>
 
             <p style={styles.tipText}>💡 Tip: Include your skills, experience, and qualifications for better matches</p>
           </div>
