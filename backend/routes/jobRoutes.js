@@ -46,16 +46,25 @@ router.get("/jobs", async (req, res) => {
     }
 
     const result = await db.query(`
-      SELECT *
-      FROM jobs
-      ORDER BY id DESC
+      SELECT
+id,
+title,
+company,
+location,
+type,
+experience,
+salary,
+description,
+created_at
+FROM jobs
+ORDER BY created_at DESC;
     `);
 
     jobCache.set(result.rows);
 
     res.json(result.rows);
   } catch (err) {
-    console.log(err);
+    console.error("Job Route Error:", err);
 
     res.status(500).json({
       success: false,
@@ -98,18 +107,21 @@ router.post("/apply", async (req, res) => {
 
     await db.query(
       `
-      INSERT INTO applications
-      (
-        job_id,
-        user_id,
-        status
-      )
-      VALUES
-      (
-        $1,
-        $2,
-        $3
-      )
+     INSERT INTO applications
+(
+job_id,
+user_id,
+status,
+applied_at
+)
+
+VALUES
+(
+$1,
+$2,
+$3,
+NOW()
+)
       `,
       [jobId, userId, "Applied"]
     );
@@ -155,7 +167,7 @@ router.get("/applied/:userId", async (req, res) => {
 
       FROM applications a
 
-      INNER JOIN jobs j
+      LEFT JOIN jobs j
 
       ON a.job_id=j.id
 
@@ -207,7 +219,7 @@ router.get("/my-applications/:userId", async (req, res) => {
 
       FROM applications a
 
-      INNER JOIN jobs j
+      LEFT JOIN jobs j
 
       ON a.job_id=j.id
 
@@ -227,6 +239,35 @@ router.get("/my-applications/:userId", async (req, res) => {
       error: "Server Error",
     });
   }
+});
+
+/* ==========================
+      CLEAR CACHE
+========================== */
+
+router.delete("/clear-cache", (req, res) => {
+
+    jobCache.clear();
+
+    res.json({
+
+        success: true,
+
+        message: "Cache Cleared"
+
+    });
+
+});
+router.get("/ping",(req,res)=>{
+
+    res.json({
+
+        success:true,
+
+        message:"Job Routes Working"
+
+    });
+
 });
 
 module.exports = router;

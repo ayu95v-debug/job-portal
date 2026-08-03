@@ -2,378 +2,417 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 
-/* ==========================
-        HR JOBS
-========================== */
+/* =====================================================
+                    HR JOBS
+===================================================== */
 
 router.get("/jobs/:hrId", async (req, res) => {
+    try {
 
-  try {
+        const { hrId } = req.params;
 
-    const { hrId } = req.params;
+        const result = await db.query(
+            `
+            SELECT
 
-    const result = await db.query(
+                id,
+                title,
+                company,
+                location,
+                type,
+                experience,
+                salary,
+                description,
+                created_at
 
-      `
-      SELECT *
-      FROM jobs
-      WHERE created_by=$1
-      ORDER BY id DESC
-      `,
+            FROM jobs
 
-      [hrId]
+            WHERE created_by = $1
 
-    );
+            ORDER BY created_at DESC
+            `,
+            [hrId]
+        );
 
-    res.json(result.rows);
+        res.json({
+            success: true,
+            jobs: result.rows
+        });
 
-  }
+    } catch (err) {
 
-  catch(err){
+        console.error("HR Jobs Error:", err);
 
-    console.log(err);
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
 
-    res.status(500).json({
-
-      error:"Server Error"
-
-    });
-
-  }
-
+    }
 });
 
 
-/* ==========================
-      HR APPLICANTS
-========================== */
+/* =====================================================
+                HR APPLICANTS
+===================================================== */
 
 router.get("/applicants/:hrId", async (req, res) => {
 
-  try {
+    try {
 
-    const { hrId } = req.params;
+        const { hrId } = req.params;
 
-    const result = await db.query(
+        const result = await db.query(
+            `
+            SELECT
 
-      `
-      SELECT
+                applications.id,
 
-      applications.id,
+                applications.status,
 
-      users.name,
+                applications.applied_at,
 
-      users.email,
+                users.id AS user_id,
+                users.name,
+                users.email,
+                users.linkedin,
+                users.about,
+                users.qualifications,
+                users.resume_url,
 
-      users.qualifications,
+                jobs.id AS job_id,
+                jobs.title,
+                jobs.company
 
-      users.resume_url,
+            FROM applications
 
-      jobs.title,
+            INNER JOIN users
+                ON users.id = applications.user_id
 
-      jobs.company,
+            INNER JOIN jobs
+                ON jobs.id = applications.job_id
 
-      applications.status
+            WHERE jobs.created_by = $1
 
-      FROM applications
+            ORDER BY applications.applied_at DESC
+            `,
+            [hrId]
+        );
 
-      INNER JOIN users
+        res.json({
+            success: true,
+            applicants: result.rows
+        });
 
-      ON users.id=applications.user_id
+    } catch (err) {
 
-      INNER JOIN jobs
+        console.error("Applicants Error:", err);
 
-      ON jobs.id=applications.job_id
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
 
-      WHERE jobs.created_by=$1
-
-      ORDER BY applications.id DESC
-      `,
-
-      [hrId]
-
-    );
-
-    res.json(result.rows);
-
-  }
-
-  catch(err){
-
-    console.log(err);
-
-    res.status(500).json({
-
-      error:"Server Error"
-
-    });
-
-  }
+    }
 
 });
 
 
-/* ==========================
-        HR ANALYTICS
-========================== */
+/* =====================================================
+                HR ANALYTICS
+===================================================== */
 
 router.get("/analytics/:hrId", async (req, res) => {
 
-  try {
+    try {
 
-    const { hrId } = req.params;
+        const { hrId } = req.params;
 
-    const result = await db.query(
+        const result = await db.query(
+            `
+            SELECT
 
-      `
-      SELECT
+                jobs.id,
 
-      jobs.title,
+                jobs.title,
 
-      COUNT(applications.id)::int
-      AS total_applications
+                COALESCE(
+                    COUNT(applications.id),
+                    0
+                )::INT AS total_applications
 
-      FROM jobs
+            FROM jobs
 
-      LEFT JOIN applications
+            LEFT JOIN applications
 
-      ON applications.job_id=jobs.id
+                ON applications.job_id = jobs.id
 
-      WHERE jobs.created_by=$1
+            WHERE jobs.created_by = $1
 
-      GROUP BY jobs.id
+            GROUP BY jobs.id
 
-      ORDER BY jobs.id DESC
-      `,
+            ORDER BY jobs.created_at DESC
+            `,
+            [hrId]
+        );
 
-      [hrId]
+        res.json({
+            success: true,
+            analytics: result.rows
+        });
 
-    );
+    } catch (err) {
 
-    res.json(result.rows);
+        console.error("Analytics Error:", err);
 
-  }
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
 
-  catch(err){
-
-    console.log(err);
-
-    res.status(500).json({
-
-      error:"Server Error"
-
-    });
-
-  }
+    }
 
 });
-
-
-/* ==========================
-        CREATE JOB
-========================== */
+/* =====================================================
+                    CREATE JOB
+===================================================== */
 
 router.post("/create-job", async (req, res) => {
 
-  try {
+    try {
 
-    const {
+        const {
+            title,
+            company,
+            salary,
+            description,
+            location,
+            type,
+            experience,
+            created_by
+        } = req.body;
 
-      title,
+        if (!title || !company || !description || !created_by) {
+            return res.status(400).json({
+                success: false,
+                error: "Title, Company, Description and HR Id are required."
+            });
+        }
 
-      company,
+        const result = await db.query(
+            `
+            INSERT INTO jobs
+            (
+                title,
+                company,
+                salary,
+                description,
+                location,
+                type,
+                experience,
+                created_by
+            )
 
-      description,
+            VALUES
+            (
+                $1,$2,$3,$4,$5,$6,$7,$8
+            )
 
-      location,
+            RETURNING id
+            `,
+            [
+                title,
+                company,
+                salary || "",
+                description,
+                location || "",
+                type || "",
+                experience || "",
+                created_by
+            ]
+        );
 
-      type,
+        res.status(201).json({
+            success: true,
+            message: "Job Created Successfully",
+            jobId: result.rows[0].id
+        });
 
-      experience,
+    } catch (err) {
 
-      created_by
+        console.error("Create Job Error:", err);
 
-    } = req.body;
-
-    if (
-
-      !title ||
-
-      !company ||
-
-      !description ||
-
-      !created_by
-
-    ) {
-
-      return res.status(400).json({
-
-        error:"Missing Required Fields"
-
-      });
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
 
     }
-
-    const result = await db.query(
-
-      `
-      INSERT INTO jobs
-
-      (
-
-      title,
-
-      company,
-
-      description,
-
-      location,
-
-      type,
-
-      experience,
-
-      created_by
-
-      )
-
-      VALUES
-
-      (
-
-      $1,$2,$3,$4,$5,$6,$7
-
-      )
-
-      RETURNING id
-      `,
-
-      [
-
-        title,
-
-        company,
-
-        description,
-
-        location || "",
-
-        type || "",
-
-        experience || "",
-
-        created_by
-
-      ]
-
-    );
-
-    res.json({
-
-      message:"Job Created Successfully",
-
-      jobId:result.rows[0].id
-
-    });
-
-  }
-
-  catch(err){
-
-    console.log(err);
-
-    res.status(500).json({
-
-      error:"Database Error"
-
-    });
-
-  }
 
 });
 
 
-/* ==========================
-        DELETE JOB
-========================== */
+/* =====================================================
+                    UPDATE JOB
+===================================================== */
+
+router.put("/update-job/:jobId", async (req, res) => {
+
+    try {
+
+        const { jobId } = req.params;
+
+        const {
+            title,
+            company,
+            salary,
+            description,
+            location,
+            type,
+            experience
+        } = req.body;
+
+        await db.query(
+            `
+            UPDATE jobs
+
+            SET
+
+                title = $1,
+                company = $2,
+                salary = $3,
+                description = $4,
+                location = $5,
+                type = $6,
+                experience = $7
+
+            WHERE id = $8
+            `,
+            [
+                title,
+                company,
+                salary,
+                description,
+                location,
+                type,
+                experience,
+                jobId
+            ]
+        );
+
+        res.json({
+            success: true,
+            message: "Job Updated Successfully"
+        });
+
+    } catch (err) {
+
+        console.error("Update Job Error:", err);
+
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+
+    }
+
+});
+
+
+/* =====================================================
+                    DELETE JOB
+===================================================== */
 
 router.delete("/delete-job/:jobId", async (req, res) => {
 
-  try {
+    try {
 
-    const { jobId } = req.params;
+        const { jobId } = req.params;
+        const { hrId } = req.body;
 
-    const { hrId } = req.body;
+        const verify = await db.query(
+            `
+            SELECT id
 
-    const verify = await db.query(
+            FROM jobs
 
-      `
-      SELECT id
+            WHERE id = $1
 
-      FROM jobs
+            AND created_by = $2
+            `,
+            [
+                jobId,
+                hrId
+            ]
+        );
 
-      WHERE id=$1
+        if (verify.rows.length === 0) {
 
-      AND created_by=$2
-      `,
+            return res.status(403).json({
+                success: false,
+                error: "Unauthorized"
+            });
 
-      [
+        }
 
-        jobId,
+        // Delete related applications first
+        await db.query(
+            `
+            DELETE FROM applications
 
-        hrId
+            WHERE job_id = $1
+            `,
+            [jobId]
+        );
 
-      ]
+        // Delete job
+        await db.query(
+            `
+            DELETE FROM jobs
 
-    );
+            WHERE id = $1
+            `,
+            [jobId]
+        );
 
-    if(verify.rows.length===0){
+        res.json({
+            success: true,
+            message: "Job Deleted Successfully"
+        });
 
-      return res.status(403).json({
+    } catch (err) {
 
-        error:"Unauthorized"
+        console.error("Delete Job Error:", err);
 
-      });
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
 
     }
 
-    await db.query(
+});
 
-      `
-      DELETE FROM jobs
 
-      WHERE id=$1
-      `,
+/* =====================================================
+                    HEALTH CHECK
+===================================================== */
 
-      [
-
-        jobId
-
-      ]
-
-    );
+router.get("/ping", (req, res) => {
 
     res.json({
 
-      message:"Job Deleted Successfully"
+        success: true,
+
+        message: "HR Routes Working Successfully 🚀"
 
     });
-
-  }
-
-  catch(err){
-
-    console.log(err);
-
-    res.status(500).json({
-
-      error:"Server Error"
-
-    });
-
-  }
 
 });
+
+
+/* =====================================================
+                    EXPORT
+===================================================== */
 
 module.exports = router;
