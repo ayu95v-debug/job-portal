@@ -19,7 +19,7 @@ describe("PublicHome", () => {
     render(<PublicHome />);
 
     await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith("http://localhost:5000/api/jobs");
+      expect(axios.get).toHaveBeenCalledWith("https://job-portal-omfp.onrender.com/api/jobs");
     });
   });
 });
