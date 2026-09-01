@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -15,7 +15,38 @@ export default function Home() {
   const [showUploadForm, setShowUploadForm] = useState(true);
 
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const user = useMemo(() => JSON.parse(localStorage.getItem("user") || "{}"), []);
+
+  const fetchRecommendations = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      setRecommendLoading(true);
+      console.log("Fetching recommendations for user:", user.id);
+      const response = await axios.get(`${API}/api/auth/recommend-jobs/${user.id}`);
+      console.log("Recommendations response:", response.data);
+
+      if (!response.data) {
+        throw new Error("Empty response from server");
+      }
+
+      setRecommendations(response.data.recommendedJobs || []);
+      setAnalysisText(response.data.analysis || "No analysis available.");
+    } catch (err) {
+      console.error("Recommendation error:", err);
+      console.error("Error details:", err.response?.data || err.message);
+
+      try {
+        const fallbackRes = await axios.get(`${API}/api/jobs`);
+        setRecommendations(fallbackRes.data || []);
+        setAnalysisText("Showing all available jobs. Update your profile for personalized recommendations.");
+      } catch (fallbackErr) {
+        setRecommendations([]);
+        setAnalysisText(`❌ Error: ${err.response?.data?.msg || err.message || "Cannot connect to server. Make sure backend is running."}`);
+      }
+    } finally {
+      setRecommendLoading(false);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user || user.role !== "candidate") {
@@ -30,39 +61,7 @@ export default function Home() {
         setShowUploadForm(false);
       }
     }
-  }, [user?.id]);
-
-  const fetchRecommendations = async () => {
-    if (!user?.id) return;
-    try {
-      setRecommendLoading(true);
-      console.log("Fetching recommendations for user:", user.id);
-      const response = await axios.get(`${API}/api/auth/recommend-jobs/${user.id}`);
-      console.log("Recommendations response:", response.data);
-      
-      if (!response.data) {
-        throw new Error("Empty response from server");
-      }
-      
-      setRecommendations(response.data.recommendedJobs || []);
-      setAnalysisText(response.data.analysis || "No analysis available.");
-    } catch (err) {
-      console.error("Recommendation error:", err);
-      console.error("Error details:", err.response?.data || err.message);
-      
-      // Show all jobs as fallback
-      try {
-        const fallbackRes = await axios.get(`${API}/api/jobs`);
-        setRecommendations(fallbackRes.data || []);
-        setAnalysisText("Showing all available jobs. Update your profile for personalized recommendations.");
-      } catch (fallbackErr) {
-        setRecommendations([]);
-        setAnalysisText(`❌ Error: ${err.response?.data?.msg || err.message || "Cannot connect to server. Make sure backend is running."}`);
-      }
-    } finally {
-      setRecommendLoading(false);
-    }
-  };
+  }, [fetchRecommendations, user?.id, user?.resume_url]);
 
   const handleResumeUpload = async () => {
     if (!user?.id) {
@@ -91,7 +90,7 @@ export default function Home() {
       setTimeout(() => fetchRecommendations(), 500);
     } catch (err) {
       console.error(err);
-      setMessage("❌ Resume upload failed");
+      setMessage(`❌ ${err.response?.data?.msg || "Resume upload failed"}`);
     } finally {
       setLoading(false);
     }
@@ -131,7 +130,7 @@ export default function Home() {
                 
                 <input
                   type="file"
-                  accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  accept="application/pdf"
                   onChange={(e) => {
                     setResumeFile(e.target.files[0]);
                     setMessage("");
@@ -147,7 +146,7 @@ export default function Home() {
                 ) : (
                   <div style={styles.uploadPlaceholder}>
                     <p>Click to select or drag and drop your resume</p>
-                    <p style={styles.supportedFormats}>(PDF, DOC, DOCX)</p>
+                    <p style={styles.supportedFormats}>(PDF, max 5 MB)</p>
                   </div>
                 )}
               </div>
@@ -207,9 +206,7 @@ export default function Home() {
             ) : (
               <div style={styles.jobsGrid}>
                 {recommendations.map((job) => {
-                  const matchScore = job.score || 0;
-                  const maxScore = 20; // Approximate max score
-                  const matchPercentage = Math.min(Math.round((matchScore / maxScore) * 100), 100);
+                  const matchPercentage = job.matchPercentage ?? 0;
                   const matchColor = matchPercentage >= 80 ? "#10b981" : matchPercentage >= 60 ? "#f59e0b" : "#ef4444";
                   
                   return (
@@ -245,7 +242,7 @@ export default function Home() {
                           </div>
                         )}
                         
-                        <p style={styles.jobDesc}>{job.description}</p>
+                        <p style={styles.jobDesc}>{job.description || "Job description will be shared by the employer."}</p>
                         <p style={styles.guidanceHint}>Click the score above for course guidance to improve your match.</p>
                       </div>
                       

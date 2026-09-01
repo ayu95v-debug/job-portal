@@ -141,7 +141,7 @@ export default function PublicHome() {
       }, 800);
     } catch (err) {
       console.error("Upload error:", err);
-      setMessage("Resume upload failed. Please try again.");
+      setMessage(err.response?.data?.msg || "Resume upload failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -206,7 +206,7 @@ export default function PublicHome() {
               <input
                 id="resume-upload"
                 type="file"
-                accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                accept="application/pdf"
                 onChange={(e) => {
                   const selected = e.target.files?.[0] || null;
                   setResumeFile(selected);

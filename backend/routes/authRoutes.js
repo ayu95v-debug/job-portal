@@ -7,7 +7,10 @@ const multer = require("multer");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-const pdfParse = require("pdf-parse");
+const pdfParseModule = require("pdf-parse");
+const pdfParse = pdfParseModule && pdfParseModule.PDFParse
+    ? pdfParseModule.PDFParse
+    : (typeof pdfParseModule === "function" ? pdfParseModule : null);
 
 const db = require("../db");
 
@@ -41,7 +44,18 @@ const storage = multer.diskStorage({
 
 });
 
-const upload = multer({ storage });
+const upload = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === "application/pdf") {
+            cb(null, true);
+            return;
+        }
+
+        cb(new Error("Only PDF resumes are supported for resume matching."));
+    }
+});
 
 /* =====================================================
                     MAIL
@@ -229,15 +243,26 @@ async function readResume(filePath){
 
             return "";
 
-        const buffer=
+        if (!pdfParse) {
+            console.error("pdf-parse module is unavailable or incompatible");
+            return "";
+        }
 
-        fs.readFileSync(filePath);
+        const buffer = fs.readFileSync(filePath);
+        const pdfData = new Uint8Array(buffer);
 
-        const pdf=
+        if (pdfParse && pdfParse.prototype && typeof pdfParse.prototype.getText === "function") {
+            const parser = new pdfParse({ data: pdfData });
+            const result = await parser.getText();
+            return result && result.text ? result.text : "";
+        }
 
-        await pdfParse(buffer);
+        if (typeof pdfParse === "function") {
+            const result = await pdfParse(pdfData);
+            return result && result.text ? result.text : "";
+        }
 
-        return pdf.text || "";
+        return "";
 
     }
 
@@ -344,38 +369,71 @@ const stopWords=new Set([
 ===================================================== */
 
 const skillAliases={
-
-python:["python","py"],
-
-java:["java"],
-
-javascript:["javascript","js"],
-
-react:["react","reactjs"],
-
-nodejs:["node","nodejs"],
-
-express:["express"],
-
-mysql:["mysql"],
-
-postgresql:["postgresql","postgres"],
-
-mongodb:["mongodb"],
-
-docker:["docker"],
-
-git:["git"],
-
-aws:["aws"],
-
-ai:["ai"],
-
-ml:["machine learning","ml"],
-
-sql:["sql"]
-
+    python:["python","py","pandas","numpy","scikit","scikit-learn","scipy"],
+    java:["java"],
+    javascript:["javascript","js"],
+    react:["react","reactjs"],
+    nodejs:["node","nodejs"],
+    express:["express"],
+    mysql:["mysql"],
+    postgresql:["postgresql","postgres"],
+    mongodb:["mongodb"],
+    docker:["docker"],
+    git:["git"],
+    aws:["aws","amazon web services"],
+    sql:["sql","database","databases"],
+    ai:["artificial intelligence","ai","a.i."],
+    machine_learning:["machine learning","ml","ml engineer","ml model","ml models","deep learning","neural network","neural networks"],
+    data_science:["data science","data scientist","data analyst","analytics","statistical modeling","statistics","data engineering","data engineer"],
+    data_tools:["pandas","numpy","scipy","matplotlib","seaborn","plotly","jupyter","power bi","tableau"],
+    nlp:["nlp","natural language processing","text analytics"],
+    computer_vision:["computer vision","cv","image processing"],
+    tensorflow:["tensorflow","pytorch","keras","torch"],
+    power_bi:["power bi","tableau"],
+    database:["mysql","postgresql","sql","database","databases"]
 };
+
+/* =====================================================
+                RESUME MATCHING HELPERS
+===================================================== */
+
+function hasPhrase(text, phrase) {
+    const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(^|[^a-z0-9+#.])${escaped}(?=$|[^a-z0-9+#.])`, "i").test(text);
+}
+
+function extractSkills(text = "") {
+    const normalizedText = String(text).toLowerCase();
+
+    return Object.entries(skillAliases)
+        .filter(([, aliases]) => aliases.some((alias) => hasPhrase(normalizedText, alias)))
+        .map(([skill]) => skill);
+}
+
+function scoreJob(job, skills = []) {
+    const title = String(job.title || "").toLowerCase();
+    const description = String(job.description || "").toLowerCase();
+    const matchedSkills = [];
+    let score = 0;
+
+    for (const skill of skills) {
+        const aliases = skillAliases[skill] || [skill];
+        const inTitle = aliases.some((alias) => hasPhrase(title, alias));
+        const inDescription = aliases.some((alias) => hasPhrase(description, alias));
+
+        if (inTitle || inDescription) {
+            matchedSkills.push({ skill, source: inTitle ? "title" : "description" });
+
+            const mlBoost = /machine learning|data scientist|ml engineer|ai engineer|data analyst|data science|ai|deep learning|nlp|computer vision/.test(title)
+                ? 2
+                : 0;
+
+            score += inTitle ? 5 + mlBoost : 2;
+        }
+    }
+
+    return { score, matchedSkills };
+}
 /* =====================================================
                     SIGNUP
 ===================================================== */
@@ -1171,205 +1229,162 @@ router.get("/recommend-jobs/:userId", async (req, res) => {
 
         /* ---------------- USER PROFILE ---------------- */
 
-        const profile = await db.query(
+        let user = null;
 
-            `
-            SELECT
+        try {
+            const profile = await db.query(
+                `
+                SELECT
+                    qualifications,
+                    about,
+                    linkedin,
+                    resume_url
+                FROM users
+                WHERE id = $1
+                `,
+                [userId]
+            );
 
-            qualifications,
-            about,
-            linkedin,
-            resume_url
+            if (profile.rows.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    msg: "User not found"
+                });
+            }
 
-            FROM users
-
-            WHERE id = $1
-            `,
-
-            [userId]
-
-        );
-
-        if (profile.rows.length === 0) {
-
-            return res.status(404).json({
-
-                success:false,
-
-                msg:"User not found"
-
+            user = profile.rows[0];
+        } catch (dbErr) {
+            console.error("Recommendation profile lookup failed:", dbErr);
+            return res.status(200).json({
+                success: true,
+                analysis: "Recommendations are temporarily unavailable. Please try again in a moment.",
+                skills: [],
+                recommendedJobs: []
             });
-
         }
-
-        const user = profile.rows[0];
 
         /* ---------------- RESUME ---------------- */
 
         let resumeText = "";
 
         if (user.resume_url) {
+            try {
+                const resumePath = path.join(
+                    __dirname,
+                    "..",
+                    "uploads",
+                    path.basename(user.resume_url)
+                );
 
-            const resumePath = path.join(
-
-                __dirname,
-
-                "..",
-
-                "uploads",
-
-                path.basename(user.resume_url)
-
-            );
-
-            resumeText = await readResume(resumePath);
-
+                resumeText = await readResume(resumePath);
+            } catch (resumeErr) {
+                console.error("Resume read failed for recommendation:", resumeErr);
+                resumeText = "";
+            }
         }
 
         /* ---------------- PROFILE TEXT ---------------- */
 
         const profileText = [
-
             user.qualifications,
-
             user.about,
-
             user.linkedin,
-
             resumeText
-
         ]
+            .filter(Boolean)
+            .join(" ");
 
-        .filter(Boolean)
-
-        .join(" ");
-
-        console.log("Profile Length:",profileText.length);
+        console.log("Profile Length:", profileText.length);
 
         /* ---------------- SKILLS ---------------- */
 
-        const skills = extractSkills(profileText);
+        const resumeSkills = extractSkills(resumeText || "");
+        const profileSkills = extractSkills(
+            [user.qualifications, user.about, user.linkedin].filter(Boolean).join(" ")
+        );
+        const skills = [...new Set([...resumeSkills, ...profileSkills])];
 
-        console.log("Skills:",skills);
+        console.log("Resume Skills:", resumeSkills);
+        console.log("Profile Skills:", profileSkills);
+        console.log("Final Skills:", skills);
 
         /* ---------------- JOB CACHE ---------------- */
 
         let jobs = cache.get();
 
-        if(!jobs){
+        if (!jobs) {
+            try {
+                const result = await db.query(
+                    `
+                    SELECT *
+                    FROM jobs
+                    ORDER BY created_at DESC
+                    `
+                );
 
-            const result=
-
-            await db.query(
-
-                `
-                SELECT *
-
-                FROM jobs
-
-                ORDER BY created_at DESC
-                `
-            );
-
-            jobs=result.rows;
-
-            cache.set(jobs);
-
+                jobs = Array.isArray(result.rows) ? result.rows : [];
+                cache.set(jobs);
+            } catch (jobErr) {
+                console.error("Loading jobs for recommendation failed:", jobErr);
+                jobs = [];
+            }
         }
 
-        console.log(
+        console.log("Jobs:", jobs.length);
 
-            "Jobs:",
+        if (!Array.isArray(jobs) || jobs.length === 0) {
+            return res.json({
+                success: true,
+                analysis: "No jobs are available right now. Please check back later.",
+                skills,
+                recommendedJobs: []
+            });
+        }
 
-            jobs.length
-
-        );
-
-        /* ---------------- NEXT PART ---------------- */
         /* ---------------- SCORE ALL JOBS ---------------- */
 
         const scoredJobs = jobs
             .map((job) => {
-
                 const { score, matchedSkills } = scoreJob(job, skills);
-
                 return {
-
                     ...job,
-
                     score,
-
                     matchedSkills
-
                 };
-
             })
-
             .sort((a, b) => b.score - a.score);
 
         /* ---------------- FILTER JOBS ---------------- */
 
-        const matchedJobs = scoredJobs.filter(
-
-            (job) => job.score > 0
-
-        );
+        const matchedJobs = scoredJobs.filter((job) => job.score > 0);
 
         let recommendedJobs = [];
-
         let analysis = "";
 
         if (matchedJobs.length > 0) {
-
             recommendedJobs = matchedJobs.slice(0, 8);
-
-            analysis =
-                `Found ${matchedJobs.length} matching jobs based on your resume and profile.`;
-
-        }
-
-        else if (skills.length === 0) {
-
+            analysis = `Found ${matchedJobs.length} matching jobs based on your resume and profile.`;
+        } else if (skills.length === 0) {
             recommendedJobs = scoredJobs.slice(0, 10);
-
-            analysis =
-                "Complete your profile and upload your resume to receive personalized recommendations.";
-
-        }
-
-        else {
-
+            analysis = "Complete your profile and upload your resume to receive personalized recommendations.";
+        } else {
             recommendedJobs = scoredJobs.slice(0, 5);
-
-            analysis =
-                "No exact skill matches found. Showing the closest available jobs.";
-
+            analysis = "No exact skill matches found. Showing the closest available jobs.";
         }
 
         /* ---------------- MATCH PERCENTAGE ---------------- */
 
         recommendedJobs = recommendedJobs.map((job) => {
-
             let percent = 0;
 
-            if (skills.length > 0) {
-
-                percent = Math.round(
-
-                    (job.matchedSkills.length / skills.length) * 100
-
-                );
-
+            if (skills.length > 0 && Array.isArray(job.matchedSkills)) {
+                percent = Math.round((job.matchedSkills.length / skills.length) * 100);
             }
 
             return {
-
                 ...job,
-
                 matchPercentage: Math.min(percent, 100)
-
             };
-
         });
 
         console.log("Recommended:", recommendedJobs.length);
@@ -1377,29 +1392,21 @@ router.get("/recommend-jobs/:userId", async (req, res) => {
         /* ---------------- RESPONSE ---------------- */
 
         res.json({
-
             success: true,
-
             analysis,
-
             skills,
-
             recommendedJobs
-
         });
 
-    }
-
-    catch (err) {
+    } catch (err) {
 
         console.log(err);
 
-        res.status(500).json({
-
-            success: false,
-
-            msg: err.message
-
+        res.status(200).json({
+            success: true,
+            analysis: "Recommendations are temporarily unavailable. Please try again later.",
+            skills: [],
+            recommendedJobs: []
         });
 
     }
@@ -1438,7 +1445,7 @@ router.get("/my-applications/:userId", async (req, res) => {
 
                 applications.status,
 
-                applications.applied_at
+                applications.created_at
 
             FROM applications
 
@@ -1448,7 +1455,7 @@ router.get("/my-applications/:userId", async (req, res) => {
 
             WHERE applications.user_id = $1
 
-            ORDER BY applications.applied_at DESC
+            ORDER BY applications.created_at DESC
             `,
 
             [userId]

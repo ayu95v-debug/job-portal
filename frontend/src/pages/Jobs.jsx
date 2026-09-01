@@ -10,7 +10,17 @@ export default function Jobs() {
   const [loading, setLoading] = useState(true);
   const [scoreMap, setScoreMap] = useState({});
   const [matchedSkillsMap, setMatchedSkillsMap] = useState({});
+  const [appliedJobs, setAppliedJobs] = useState({});
+  const [toast, setToast] = useState({ show: false, message: "", type: "info" });
   const navigate = useNavigate();
+
+  const showToast = (message, type = "info") => {
+    setToast({ show: true, message, type });
+    window.clearTimeout(showToast.timeoutId);
+    showToast.timeoutId = window.setTimeout(() => {
+      setToast((prev) => ({ ...prev, show: false }));
+    }, 2500);
+  };
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "null");
@@ -20,6 +30,7 @@ export default function Jobs() {
     }
     fetchJobs();
     fetchRecommendations(user.id);
+    fetchAppliedJobs(user.id);
   }, [navigate]);
 
   const fetchJobs = async () => {
@@ -34,6 +45,20 @@ export default function Jobs() {
     }
   };
 
+  const fetchAppliedJobs = async (userId) => {
+    try {
+      const res = await axios.get(`${API}/api/my-applications/${userId}`);
+      const applied = {};
+      (res.data?.applications || []).forEach((item) => {
+        applied[item.job_id || item.id] = true;
+      });
+      setAppliedJobs(applied);
+    } catch (err) {
+      console.log("Applied jobs fetch failed:", err);
+      setAppliedJobs({});
+    }
+  };
+
   const fetchRecommendations = async (userId) => {
     try {
       const res = await axios.get(`${API}/api/auth/recommend-jobs/${userId}`);
@@ -41,7 +66,7 @@ export default function Jobs() {
       const scores = {};
       const skills = {};
       recommendations.forEach((job) => {
-        scores[job.id] = job.score || 0;
+        scores[job.id] = job.matchPercentage ?? Math.min(Math.round(((job.score || 0) / 20) * 100), 100);
         skills[job.id] = job.matchedSkills || [];
       });
       setScoreMap(scores);
@@ -62,21 +87,38 @@ export default function Jobs() {
         return;
       }
 
+      if (appliedJobs[jobId]) {
+        showToast("Already applied to this job.", "error");
+        return;
+      }
+
       const res = await axios.post(`${API}/api/apply`, {
         jobId,
         userId: user.id,
       });
 
-      alert(res.data.message || "Applied successfully");
+      setAppliedJobs((prev) => ({ ...prev, [jobId]: true }));
+      showToast(res.data.message || "Applied successfully.", "success");
       fetchJobs();
     } catch (err) {
-      alert(err.response?.data?.error || err.message || "Could not apply");
+      const message = err.response?.data?.error || err.message || "Could not apply";
+      if (message === "Already Applied") {
+        setAppliedJobs((prev) => ({ ...prev, [jobId]: true }));
+        showToast("Already applied to this job.", "error");
+        return;
+      }
+      showToast(message, "error");
     }
   };
 
   return (
     <>
       <Navbar />
+      {toast.show && (
+        <div className={`app-toast ${toast.type}`} role="alert">
+          {toast.message}
+        </div>
+      )}
       <div className="app-page">
         <div className="app-shell">
           <div className="app-hero">
@@ -110,14 +152,14 @@ export default function Jobs() {
                     {(job.description || "").length > 150 ? "..." : ""}
                   </p>
                   <div className="app-score-row">
-                    <span className="app-score">Match: {Math.min(Math.round(((scoreMap[job.id] || 0) / 20) * 100), 100)}%</span>
+                    <span className="app-score">Match: {scoreMap[job.id] ?? 0}%</span>
                     <button
                       className="app-btn secondary"
                       onClick={() =>
                         navigate("/career-guidance", {
                           state: {
                             job: { ...job, matchedSkills: matchedSkillsMap[job.id] || [] },
-                            matchPercentage: Math.min(Math.round(((scoreMap[job.id] || 0) / 20) * 100), 100),
+                            matchPercentage: scoreMap[job.id] ?? 0,
                           },
                         })
                       }
@@ -125,8 +167,17 @@ export default function Jobs() {
                       Guidance
                     </button>
                   </div>
-                  <button className="app-btn success" onClick={() => applyJob(job.id)}>
-                    Apply Now
+                  <button
+                    className="app-btn success"
+                    onClick={() => applyJob(job.id)}
+                    disabled={!!appliedJobs[job.id]}
+                    style={
+                      appliedJobs[job.id]
+                        ? { opacity: 0.7, cursor: "not-allowed" }
+                        : {}
+                    }
+                  >
+                    {appliedJobs[job.id] ? "Already Applied" : "Apply Now"}
                   </button>
                 </article>
               ))}

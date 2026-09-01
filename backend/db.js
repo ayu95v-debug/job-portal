@@ -1,11 +1,11 @@
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 const { Pool } = require("pg");
 
 // Check DATABASE_URL exists
 if (!process.env.DATABASE_URL) {
-  console.error("❌ DATABASE_URL is missing in .env file");
-  process.exit(1);
+  console.warn("⚠️ DATABASE_URL is missing in .env file. App will continue in degraded mode until the database is configured.");
 }
 
 // Create PostgreSQL Pool

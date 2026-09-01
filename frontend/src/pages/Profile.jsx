@@ -26,14 +26,14 @@
 // }
 
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import API from "../api";
 import Navbar from "../components/Navbar";
 import "./AppPages.css";
 
 export default function Profile() {
-  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const storedUser = useMemo(() => JSON.parse(localStorage.getItem("user") || "{}"), []);
   const userId = storedUser?.id || storedUser?.userId || localStorage.getItem("userId");
 
   const [profile, setProfile] = useState({
@@ -59,34 +59,35 @@ export default function Profile() {
     axios
       .get(`${API}/api/auth/profile/${userId}`)
       .then((res) => {
-        setProfile(res.data);
-        localStorage.setItem("user", JSON.stringify({ ...storedUser, ...res.data }));
+        const userData = res.data?.user || res.data || {};
+        setProfile((prev) => ({ ...prev, ...userData }));
+        localStorage.setItem("user", JSON.stringify({ ...storedUser, ...userData }));
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [userId]);
+  }, [userId, storedUser]);
 
-  useEffect(() => {
-    if (!userId || profile.role !== "candidate") return;
-    fetchRecommendations();
-  }, [userId, profile.role, profile.qualifications, profile.resume_url]);
-
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = useCallback(async () => {
     if (!userId) return;
 
     try {
       setRecommendLoading(true);
       const res = await axios.get(`${API}/api/auth/recommend-jobs/${userId}`);
-      setRecommendations(res.data.recommendedJobs || []);
-      setAnalysisText(res.data.analysis || "");
+      setRecommendations(res.data?.recommendedJobs || []);
+      setAnalysisText(res.data?.analysis || "Could not fetch recommendations right now.");
     } catch (err) {
       console.error(err);
       setRecommendations([]);
-      setAnalysisText("Could not fetch recommendations right now.");
+      setAnalysisText(err.response?.data?.msg || "Could not fetch recommendations right now.");
     } finally {
       setRecommendLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId || profile.role !== "candidate") return;
+    fetchRecommendations();
+  }, [userId, profile.role, fetchRecommendations]);
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
@@ -110,8 +111,10 @@ export default function Profile() {
           about: profile.about,
         }
       );
+      const updatedUser = res.data?.user || { ...storedUser, ...profile };
       setMessage(res.data.msg || "Profile saved successfully");
-      localStorage.setItem("user", JSON.stringify({ ...storedUser, ...profile }));
+      setProfile((prev) => ({ ...prev, ...updatedUser }));
+      localStorage.setItem("user", JSON.stringify({ ...storedUser, ...updatedUser }));
     } catch (err) {
       console.error(err);
       setMessage(err.response?.data?.msg || "Could not save profile");
@@ -248,7 +251,7 @@ export default function Profile() {
               <input
                 name="resume"
                 type="file"
-                accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                accept="application/pdf"
                 onChange={(e) => setResumeFile(e.target.files[0])}
                 className="app-input"
               />
@@ -277,7 +280,7 @@ export default function Profile() {
                           <h4 style={styles.jobTitle}>{job.title}</h4>
                           <p style={styles.jobMeta}>{job.company}</p>
                           {job.location && <p style={styles.jobMeta}>{job.location}</p>}
-                          <p style={styles.jobDescription}>{job.description}</p>
+                          <p style={styles.jobDescription}>{job.description || "Job description will be shared by the employer."}</p>
                         </div>
                         <button
                           type="button"

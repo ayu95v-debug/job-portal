@@ -112,7 +112,7 @@ router.post("/apply", async (req, res) => {
 job_id,
 user_id,
 status,
-applied_at
+created_at
 )
 
 VALUES
@@ -163,7 +163,7 @@ router.get("/applied/:userId", async (req, res) => {
       j.experience,
 
       a.status,
-      a.applied_at
+      a.created_at
 
       FROM applications a
 
@@ -173,7 +173,7 @@ router.get("/applied/:userId", async (req, res) => {
 
       WHERE a.user_id=$1
 
-      ORDER BY a.applied_at DESC
+      ORDER BY a.created_at DESC
       `,
       [userId]
     );
@@ -215,7 +215,7 @@ router.get("/my-applications/:userId", async (req, res) => {
 
       a.status,
 
-      a.applied_at
+      a.created_at
 
       FROM applications a
 
@@ -225,7 +225,7 @@ router.get("/my-applications/:userId", async (req, res) => {
 
       WHERE a.user_id=$1
 
-      ORDER BY a.applied_at DESC
+      ORDER BY a.created_at DESC
       `,
       [userId]
     );

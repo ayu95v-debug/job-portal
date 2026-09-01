@@ -70,7 +70,7 @@ router.get("/applicants/:hrId", async (req, res) => {
 
                 applications.status,
 
-                applications.applied_at,
+                applications.created_at,
 
                 users.id AS user_id,
                 users.name,
@@ -94,7 +94,7 @@ router.get("/applicants/:hrId", async (req, res) => {
 
             WHERE jobs.created_by = $1
 
-            ORDER BY applications.applied_at DESC
+            ORDER BY applications.created_at DESC
             `,
             [hrId]
         );

@@ -1,9 +1,9 @@
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
-const path = require("path");
 
 const app = express();
 
@@ -450,6 +450,15 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
 
   console.error(err);
+
+  if (err.code === "LIMIT_FILE_SIZE" || err.message === "Only PDF resumes are supported for resume matching.") {
+    return res.status(400).json({
+      success: false,
+      msg: err.code === "LIMIT_FILE_SIZE"
+        ? "Resume must be 5 MB or smaller."
+        : err.message,
+    });
+  }
 
   res.status(500).json({
 

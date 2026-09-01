@@ -1,3 +1,3 @@
-const API = process.env.REACT_APP_API_URL || "https://job-portal-omfp.onrender.com";
+const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 export default API;

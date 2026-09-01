@@ -80,12 +80,16 @@ function mapCoursesForSkills(skills) {
       courses.add("Low-Level Programming and Memory Management");
     }
     if (["python", "sql", "data science", "machine learning", "ai", "analytics"].includes(skill)) {
-      courses.add("Python and SQL for Data Roles");
-      courses.add("Intro to Machine Learning");
+      courses.add("Python for Data Science");
+      courses.add("SQL for Analytics");
+      courses.add("Machine Learning Foundations");
+      courses.add("Power BI and Data Visualization");
     }
     if (["react", "node", "javascript", "typescript"].includes(skill)) {
-      courses.add("Modern Web Development with React");
-      courses.add("Backend APIs with Node.js");
+      courses.add("React Frontend Development");
+      courses.add("Node.js API Development");
+      courses.add("REST APIs and Database Integration");
+      courses.add("Git and Deployment Basics");
     }
     if (["html", "css"].includes(skill)) {
       courses.add("HTML5 and CSS3 Fundamentals");
@@ -93,18 +97,21 @@ function mapCoursesForSkills(skills) {
     }
     if (["aws", "docker", "kubernetes", "devops"].includes(skill)) {
       courses.add("Cloud and DevOps Foundations");
-      courses.add("Docker / Kubernetes Essentials");
+      courses.add("Docker and Kubernetes Essentials");
     }
     if (["seo", "content", "social media", "marketing"].includes(skill)) {
-      courses.add("Digital Marketing and SEO");
-      courses.add("Content Strategy for Brands");
+      courses.add("SEO and Content Strategy");
+      courses.add("Social Media Campaign Planning");
+      courses.add("Digital Marketing Fundamentals");
     }
     if (["finance", "accounting", "excel"].includes(skill)) {
       courses.add("Financial Analysis and Reporting");
       courses.add("Excel for Business");
+      courses.add("Accounting Fundamentals");
     }
     if (["recruitment", "human resources", "leadership", "communication"].includes(skill)) {
-      courses.add("People Operations and Recruitment");
+      courses.add("Talent Acquisition and Recruitment");
+      courses.add("People Operations and HR Basics");
       courses.add("Communication and Leadership Skills");
     }
     if (["design", "ui/ux"].includes(skill)) {
@@ -113,7 +120,7 @@ function mapCoursesForSkills(skills) {
     }
   });
 
-  return Array.from(courses).slice(0, 6);
+  return Array.from(courses).slice(0, 4);
 }
 
 function getBaseGuidance(job) {
@@ -140,9 +147,9 @@ function getBaseGuidance(job) {
         "Your current match is with data and analytics roles. Improve your score by adding more data science projects and analytics tools.",
       courses: [
         "Python for Data Science",
-        "SQL and Database Fundamentals",
-        "Machine Learning Basics",
-        "Data Visualization with Power BI or Tableau",
+        "SQL for Analytics",
+        "Machine Learning Foundations",
+        "Power BI and Data Visualization",
       ],
       focus: ["Python", "SQL", "Machine Learning", "Projects"],
     };
@@ -154,10 +161,10 @@ function getBaseGuidance(job) {
       description:
         "This role fits software engineering and web development. Improve your match by strengthening practical coding and project experience.",
       courses: [
-        "Full-Stack Web Development",
-        "React or Angular Frontend Development",
-        "Node.js / Express Backend Development",
-        "API Design and Database Integration",
+        "React Frontend Development",
+        "Node.js API Development",
+        "REST APIs and Database Integration",
+        "Git and Deployment Basics",
       ],
       focus: ["Projects", "Code Samples", "Frameworks", "APIs"],
     };
@@ -169,10 +176,10 @@ function getBaseGuidance(job) {
       description:
         "This role leans toward marketing and communications. Improve your score by showcasing campaign work and digital marketing experience.",
       courses: [
-        "Digital Marketing Fundamentals",
         "SEO and Content Strategy",
         "Social Media Campaign Planning",
-        "Brand Communications and Copywriting",
+        "Digital Marketing Fundamentals",
+        "Content Performance Analytics",
       ],
       focus: ["Campaigns", "Content", "SEO", "Social Media"],
     };
@@ -185,9 +192,9 @@ function getBaseGuidance(job) {
         "This role fits finance and business analysis. Improve your score by adding financial tools, reporting, and analytical experience.",
       courses: [
         "Financial Analysis and Reporting",
-        "Excel / Google Sheets for Finance",
+        "Excel for Business",
+        "Accounting Fundamentals",
         "Business Analytics",
-        "Accounting Principles",
       ],
       focus: ["Reporting", "Numbers", "Tools", "Analysis"],
     };
@@ -199,10 +206,10 @@ function getBaseGuidance(job) {
       description:
         "This role targets HR and recruitment. Improve your score by highlighting hiring, onboarding, and employee support experience.",
       courses: [
-        "HR Fundamentals",
         "Talent Acquisition and Recruitment",
-        "Employee Relations",
-        "Performance Management",
+        "People Operations and HR Basics",
+        "Communication and Leadership Skills",
+        "Employee Experience and Onboarding",
       ],
       focus: ["Recruitment", "Onboarding", "Employee Experience", "HR Tools"],
     };
@@ -219,6 +226,21 @@ function getBaseGuidance(job) {
     ],
     focus: ["Skills", "Projects", "Certifications"],
   };
+}
+
+function dedupeCourses(courses) {
+  const seen = new Set();
+
+  return courses.filter((course) => {
+    const normalized = String(course || "").trim().toLowerCase();
+
+    if (!normalized || seen.has(normalized)) {
+      return false;
+    }
+
+    seen.add(normalized);
+    return true;
+  });
 }
 
 function getGuidance(job, matchPercentage, profileText) {
@@ -238,7 +260,10 @@ function getGuidance(job, matchPercentage, profileText) {
     ? Math.min(matchPercentage + missingSkills.length * 8, 100)
     : 0;
 
-  const courseSuggestions = [...base.courses, ...mapCoursesForSkills(missingSkills)].slice(0, 6);
+  const courseSuggestions = dedupeCourses([
+    ...base.courses,
+    ...mapCoursesForSkills(missingSkills),
+  ]).slice(0, 4);
 
   return {
     ...base,
