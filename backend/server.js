@@ -43,7 +43,25 @@ if (!fs.existsSync(uploadsDir)) {
                 MIDDLEWARE
 =========================================== */
 
-app.use(cors());
+const allowedOrigins = [
+  /^https?:\/\/localhost(?::\d+)?$/,
+  /^https?:\/\/127\.0\.0\.1(?::\d+)?$/,
+  /^https:\/\/.*\.onrender\.com$/,
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.some((pattern) => pattern.test(origin))) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 

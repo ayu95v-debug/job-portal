@@ -35,3 +35,6 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+
+# Note: if your backend Render service has a different generated hostname,
+# update REACT_APP_API_URL to match that exact backend URL.
