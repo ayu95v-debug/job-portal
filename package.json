@@ -1,5 +1,8 @@
 {
-  "dependencies": {
-    "@supabase/supabase-js": "^2.110.8"
+  "name": "job-portal",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix frontend install && npm --prefix frontend run build && node -e \"const fs=require('fs'); const path=require('path'); const src=path.join('frontend','build'); const dest='build'; fs.rmSync(dest,{recursive:true,force:true}); fs.cpSync(src,dest,{recursive:true});\"",
+    "start": "npm --prefix frontend start"
   }
 }
